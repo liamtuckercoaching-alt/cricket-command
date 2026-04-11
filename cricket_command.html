@@ -1924,8 +1924,6 @@ function confirmDismissal(){
     inn.activeBatter=inn.batters.length-1;
   }
 
-  // Use the over the W ball was in (not curOver after recompute, which may
-  // already point to the next over if this was the 6th ball of the over)
   const wBallOver = wBall ? (wBall.over||0) : curOver(inn);
   recompute(inn);
   checkOverAdv(inn, wBallOver);
