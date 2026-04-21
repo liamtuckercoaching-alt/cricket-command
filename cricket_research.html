@@ -1314,10 +1314,13 @@ async function downloadDebriefReport(){
     phaseCfg.forEach(p=>st[p.key]={runs:0,legal:0,wkts:0,fours:0,sixes:0,dots:0});
     let li=0;
     (innObj.balls||[]).forEach(b=>{
-      if(b.type==='penalty'||['wd','nb'].includes(b.type)) return;
+      if(b.type==='penalty') return;
+      const isExtra=['wd','nb'].includes(b.type);
       let cum=0; const pk=phaseCfg.find(p=>{cum+=p.maxBalls;return li<cum;})?.key||'dt';
+      st[pk].runs+=b.runs||0;
+      if(isExtra) return;
       li++;
-      st[pk].runs+=b.runs||0; st[pk].legal++;
+      st[pk].legal++;
       if(b.type==='W') st[pk].wkts++;
       if(b.type===4) st[pk].fours++;
       if(b.type===6) st[pk].sixes++;
@@ -1826,12 +1829,12 @@ function renderMatchAnalysis(m){
     let li=0;
     (innObj.balls||[]).forEach(b=>{
       if(b.type==='penalty') return;
-      const isLegal=!['wd','nb'].includes(b.type);
-      if(!isLegal){ return; }
+      const isExtra=['wd','nb'].includes(b.type);
       let cum=0;
       const pk=phaseCfg.find(p=>{cum+=p.maxBalls;return li<cum;})?.key||'dt';
-      li++;
       stats[pk].runs+=b.runs||0;
+      if(isExtra){ return; }
+      li++;
       stats[pk].legal++;
       if(b.type==='W') stats[pk].wickets++;
     });
