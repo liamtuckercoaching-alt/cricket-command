@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cricket Squad Manager</title>
+<style>
+:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f5f5f3;
+  --bg-tertiary: #eeece8;
+  --text-primary: #1a1a18;
+  --text-secondary: #5a5a58;
+  --text-tertiary: #9a9a98;
+  --border-tertiary: rgba(30,30,20,0.12);
+  --border-secondary: rgba(30,30,20,0.22);
+  --border-primary: rgba(30,30,20,0.35);
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --font-mono: 'Courier New', Courier, monospace;
+  --green: #5ecf5e;
+  --green-bg: #0d1f0d;
+  --green-border: #3d7a3d;
+  --blue: #6eaecf;
+  --blue-bg: #0d1422;
+  --blue-border: #3a5080;
+  --amber: #d4940a;
+  --amber-bg: #1a1000;
+  --amber-border: #7a5a1a;
+  --red: #e05c5c;
+  --red-bg: #2a1010;
+  --red-border: #803a3a;
+  --purple: #ae7ecf;
+  --purple-bg: #1a1028;
+  --purple-border: #5a3a80;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #1c1c1a;
+    --bg-secondary: #252523;
+    --bg-tertiary: #2e2e2c;
+    --text-primary: #f0ede8;
+    --text-secondary: #a0a09e;
+    --text-tertiary: #606060;
+    --border-tertiary: rgba(255,255,230,0.10);
+    --border-secondary: rgba(255,255,230,0.18);
+    --border-primary: rgba(255,255,230,0.28);
+  }
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-mono);background:var(--bg-tertiary);color:var(--text-primary);min-height:100vh}
+.app{max-width:1100px;margin:0 auto;padding:14px}
+
+/* TOP BAR */
+.top-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;background:var(--bg-secondary);border:.5px solid var(--border-secondary);border-radius:var(--radius-lg);padding:10px 14px}
+.brand{font-size:14px;font-weight:500;letter-spacing:.13em;color:var(--text-secondary);text-transform:uppercase}
+.sub{font-size:10px;color:var(--text-tertiary);margin-top:2px;letter-spacing:.07em}
+
+/* MAIN TABS */
+.main-tab-bar{display:flex;gap:0;margin-bottom:14px;background:var(--bg-secondary);border:.5px solid var(--border-tertiary);border-radius:var(--radius-lg);overflow:hidden}
+.main-tab{flex:1;font-family:var(--font-mono);font-size:11px;padding:10px 4px;border:none;background:transparent;color:var(--text-tertiary);cursor:pointer;letter-spacing:.04em;text-align:center;border-right:.5px solid var(--border-tertiary);transition:all .15s;white-space:nowrap}
+.main-tab:last-child{border-right:none}
+.main-tab:hover{background:var(--bg-primary);color:var(--text-secondary)}
+.main-tab.active{color:var(--green);background:var(--green-bg)}
+.main-tab.t-blue.active{color:var(--blue);background:var(--blue-bg)}
+.main-tab.t-amber.active{color:var(--amber);background:var(--amber-bg)}
+
+/* PANELS */
+.panel{background:var(--bg-secondary);border:.5px solid var(--border-tertiary);border-radius:var(--radius-md);padding:12px;margin-bottom:10px}
+.section-label{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:8px;border-bottom:.5px solid var(--border-tertiary);padding-bottom:4px}
+.hidden{display:none!important}
+
+/* BUTTONS */
+.btn{font-family:var(--font-mono);font-size:11px;padding:5px 12px;border:.5px solid var(--border-secondary);border-radius:4px;background:transparent;color:var(--text-secondary);cursor:pointer;transition:all .12s}
+.btn:hover{background:var(--bg-tertiary)}
+.btn.green{border-color:var(--green-border);color:var(--green);background:var(--green-bg)}
+.btn.green:hover{background:#0d2a0d}
+.btn.blue{border-color:var(--blue-border);color:var(--blue);background:var(--blue-bg)}
+.btn.blue:hover{background:#0d1a2e}
+.btn.amber{border-color:var(--amber-border);color:var(--amber);background:var(--amber-bg)}
+.btn.red{border-color:var(--red-border);color:var(--red);background:var(--red-bg)}
+.btn.purple{border-color:var(--purple-border);color:var(--purple);background:var(--purple-bg)}
+.btn.sm{font-size:10px;padding:3px 8px}
+.btn.lg{font-size:12px;padding:7px 18px;font-weight:500}
+
+/* INPUTS */
+.input{font-family:var(--font-mono);font-size:11px;padding:5px 8px;background:var(--bg-primary);border:.5px solid var(--border-secondary);border-radius:4px;color:var(--text-primary);width:100%;transition:border .15s}
+.input:focus{outline:none;border-color:var(--green-border)}
+.select{font-family:var(--font-mono);font-size:11px;padding:5px 7px;background:var(--bg-primary);border:.5px solid var(--border-secondary);border-radius:4px;color:var(--text-primary);cursor:pointer;width:100%}
+.field-label{font-size:10px;color:var(--text-tertiary);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px;margin-top:8px}
+.field-label:first-child{margin-top:0}
+
+/* LEAGUE LIST */
+.league-list{display:flex;flex-direction:column;gap:6px}
+.league-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg-primary);border:.5px solid var(--border-tertiary);border-radius:var(--radius-md);cursor:pointer;transition:border-color .1s}
+.league-item:hover{border-color:var(--border-secondary)}
+.league-item.active{border-color:var(--green-border);background:var(--green-bg)}
+.li-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.li-name{flex:1;font-size:12px;font-weight:500}
+.li-meta{font-size:10px;color:var(--text-tertiary)}
+
+/* TEAM LIST */
+.team-list{display:flex;flex-direction:column;gap:5px;margin-bottom:10px}
+.team-item{display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--bg-primary);border:.5px solid var(--border-tertiary);border-radius:var(--radius-md);cursor:pointer;transition:all .1s}
+.team-item:hover{border-color:var(--border-secondary)}
+.team-item.active{border-color:var(--blue-border);background:var(--blue-bg)}
+.ti-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.ti-name{flex:1;font-size:11px;font-weight:500}
+.ti-count{font-size:10px;color:var(--text-tertiary)}
+
+/* SQUAD TABLE */
+.squad-table{width:100%;border-collapse:collapse;font-size:11px}
+.squad-table th{color:var(--text-tertiary);font-weight:500;text-align:left;padding:5px 6px;font-size:10px;letter-spacing:.06em;border-bottom:.5px solid var(--border-secondary);white-space:nowrap}
+.squad-table td{padding:6px;border-bottom:.5px solid var(--border-tertiary);vertical-align:middle}
+.squad-table tr:last-child td{border-bottom:none}
+.squad-table tr:hover td{background:var(--bg-tertiary)}
+.role-badge{display:inline-block;padding:1px 5px;border-radius:3px;font-size:9px;letter-spacing:.07em;text-transform:uppercase;font-weight:500}
+.role-bat{background:#1a2a3a;border:.5px solid #2a5080;color:#6eaecf}
+.role-bowl{background:#2a1a0d;border:.5px solid #7a3a10;color:#cf7e4e}
+.role-all{background:#0d2a0d;border:.5px solid #2d6b2d;color:#6ecf6e}
+.role-wk{background:#2a1028;border:.5px solid #6a2a8a;color:#cf7ecf}
+
+/* PLAYER FORM */
+.player-form{background:var(--bg-primary);border:.5px solid var(--border-secondary);border-radius:var(--radius-md);padding:14px;margin-top:10px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.form-grid.cols3{grid-template-columns:1fr 1fr 1fr}
+.form-actions{display:flex;gap:8px;margin-top:12px;align-items:center}
+
+/* MATCH CREATOR */
+.match-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.team-selector{background:var(--bg-primary);border:.5px solid var(--border-tertiary);border-radius:var(--radius-lg);padding:12px}
+.ts-header{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.ts-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+.ts-label{font-size:12px;font-weight:500}
+.ts-count{font-size:10px;color:var(--text-tertiary);margin-left:auto}
+
+/* SQUAD PREVIEW */
+.squad-preview{display:flex;flex-direction:column;gap:2px;max-height:320px;overflow-y:auto;padding-right:2px;margin-top:8px}
+.squad-preview::-webkit-scrollbar{width:4px}
+.squad-preview::-webkit-scrollbar-track{background:transparent}
+.squad-preview::-webkit-scrollbar-thumb{background:var(--border-secondary);border-radius:2px}
+.sq-player{display:flex;align-items:center;gap:7px;padding:4px 8px;border-radius:3px;font-size:11px;background:var(--bg-secondary);border:.5px solid var(--border-tertiary)}
+.sq-name{flex:1}
+.sq-role{font-size:9px;color:var(--text-tertiary)}
+.sq-tags{font-size:9px;color:var(--amber)}
+.sq-section-hdr{font-size:9px;color:var(--text-tertiary);letter-spacing:.1em;text-transform:uppercase;padding:5px 8px 2px;border-bottom:.5px solid var(--border-tertiary);margin-bottom:2px}
+
+/* MATCH CONFIG */
+.config-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+.config-label{font-size:10px;color:var(--text-tertiary);letter-spacing:.08em;text-transform:uppercase;min-width:80px}
+.fmt-btn{font-family:var(--font-mono);font-size:10px;padding:4px 10px;border:.5px solid var(--border-secondary);background:transparent;color:var(--text-secondary);border-radius:4px;cursor:pointer;transition:all .15s}
+.fmt-btn.active{background:var(--green-bg);border-color:var(--green-border);color:var(--green)}
+
+/* EXPORT PANEL */
+.export-box{background:var(--green-bg);border:.5px solid var(--green-border);border-radius:var(--radius-lg);padding:16px;text-align:center}
+.export-title{font-size:13px;font-weight:500;color:var(--green);margin-bottom:6px;letter-spacing:.06em}
+.export-sub{font-size:11px;color:#a0d4a0;margin-bottom:14px;line-height:1.6}
+.export-steps{text-align:left;font-size:11px;color:#a0d4a0;margin:10px 0 14px;line-height:2}
+.export-steps span{color:var(--green);font-weight:500}
+
+/* SERIES TAB */
+.series-list{display:flex;flex-direction:column;gap:6px}
+.series-item{background:var(--bg-primary);border:.5px solid var(--border-tertiary);border-radius:var(--radius-md);padding:10px 12px}
+.si-header{display:flex;align-items:center;gap:10px;cursor:pointer}
+.si-name{flex:1;font-size:12px;font-weight:500}
+.si-meta{font-size:10px;color:var(--text-tertiary)}
+.si-toggle{font-size:12px;color:var(--text-tertiary);transition:transform .15s}
+.si-toggle.open{transform:rotate(90deg)}
+.si-matches{margin-top:10px;display:flex;flex-direction:column;gap:4px}
+.si-match{display:flex;align-items:center;gap:8px;padding:5px 8px;background:var(--bg-secondary);border:.5px solid var(--border-tertiary);border-radius:4px;font-size:11px}
+.sim-teams{flex:1}
+.sim-date{font-size:10px;color:var(--text-tertiary)}
+.sim-status{font-size:9px;padding:1px 6px;border-radius:3px;letter-spacing:.06em}
+.sim-scheduled{background:var(--amber-bg);border:.5px solid var(--amber-border);color:var(--amber)}
+.sim-played{background:var(--green-bg);border:.5px solid var(--green-border);color:var(--green)}
+
+/* EMPTY STATE */
+.empty{text-align:center;padding:40px;color:var(--text-tertiary);font-size:11px;line-height:2}
+
+/* TOAST */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--bg-secondary);border:.5px solid var(--green-border);border-radius:var(--radius-md);padding:8px 18px;font-size:11px;color:var(--green);z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px}
+.modal-box{background:var(--bg-primary);border:.5px solid var(--border-secondary);border-radius:var(--radius-lg);padding:20px;width:100%;max-width:400px;max-height:90vh;overflow-y:auto}
+.modal-title{font-size:12px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--text-primary);margin-bottom:14px}
+
+/* LAYOUT */
+.two-col{display:grid;grid-template-columns:220px 1fr;gap:14px}
+@media(max-width:700px){
+  .two-col{grid-template-columns:1fr}
+  .match-grid{grid-template-columns:1fr}
+  .form-grid{grid-template-columns:1fr}
+  .form-grid.cols3{grid-template-columns:1fr 1fr}
+}
+
+.divider{height:.5px;background:var(--border-tertiary);margin:10px 0}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div>
+      <div class="brand">Cricket Squad Manager</div>
+      <div class="sub">build squads · create matches · export to cricket command</div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="btn sm" onclick="exportAllData()">⬇ backup all data</button>
+      <label class="btn sm" style="cursor:pointer">⬆ restore backup<input type="file" accept=".json" style="display:none" onchange="importAllData(this)"></label>
+    </div>
+  </div>
+
+  <!-- MAIN TABS -->
+  <div class="main-tab-bar">
+    <button class="main-tab active" onclick="showTab('squads')">SQUADS</button>
+    <button class="main-tab t-blue" onclick="showTab('match')">MATCH CREATOR</button>
+    <button class="main-tab t-amber" onclick="showTab('series')">SERIES</button>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       TAB: SQUADS
+  ══════════════════════════════════════════════════ -->
+  <div id="tab-squads">
+    <div class="two-col">
+
+      <!-- LEFT: league + team list -->
+      <div>
+        <div class="panel" style="margin-bottom:0">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+            <div class="section-label" style="margin-bottom:0">leagues</div>
+            <button class="btn sm green" onclick="openLeagueModal()">+ league</button>
+          </div>
+          <div id="leagueList" class="league-list"></div>
+        </div>
+
+        <div id="teamPane" class="panel hidden" style="margin-top:10px;margin-bottom:0">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+            <div class="section-label" style="margin-bottom:0" id="teamPaneTitle">teams</div>
+            <button class="btn sm green" onclick="openTeamModal()">+ team</button>
+          </div>
+          <div id="teamList" class="team-list"></div>
+        </div>
+      </div>
+
+      <!-- RIGHT: squad editor -->
+      <div>
+        <div id="squadPane" class="hidden">
+          <div class="panel" style="margin-bottom:10px">
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+              <div id="squadTeamDot" style="width:14px;height:14px;border-radius:50%;flex-shrink:0"></div>
+              <div>
+                <div style="font-size:13px;font-weight:500" id="squadTeamName">—</div>
+                <div style="font-size:10px;color:var(--text-tertiary)" id="squadTeamMeta">—</div>
+              </div>
+              <div style="margin-left:auto;display:flex;gap:6px">
+                <button class="btn sm" onclick="openTeamEditModal()">edit team</button>
+                <button class="btn sm red" onclick="confirmDeleteTeam()">delete team</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+              <div class="section-label" style="margin-bottom:0">squad</div>
+              <button class="btn sm green" onclick="openAddPlayerModal()">+ add player</button>
+            </div>
+            <div style="overflow-x:auto">
+              <table class="squad-table" id="squadTable">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Role</th>
+                    <th>Bat</th>
+                    <th>Bowl</th>
+                    <th>Type</th>
+                    <th>Cap/WK</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="squadTableBody"></tbody>
+              </table>
+            </div>
+            <div id="squadEmpty" class="empty hidden">No players yet.<br>Click + add player to build your squad.</div>
+          </div>
+        </div>
+        <div id="squadPlaceholder" class="empty">← Select a league and team<br>to manage their squad.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       TAB: MATCH CREATOR
+  ══════════════════════════════════════════════════ -->
+  <div id="tab-match" class="hidden">
+
+    <!-- Match config -->
+    <div class="panel">
+      <div class="section-label">match settings</div>
+      <div class="config-row">
+        <span class="config-label">format</span>
+        <div style="display:flex;gap:5px;flex-wrap:wrap">
+          <button class="fmt-btn active" onclick="setFmt(this,'T20')">T20</button>
+          <button class="fmt-btn" onclick="setFmt(this,'ODI')">ODI</button>
+          <button class="fmt-btn" onclick="setFmt(this,'T10')">T10</button>
+          <button class="fmt-btn" onclick="setFmt(this,'LAT20')">LAT20</button>
+          <button class="fmt-btn" onclick="setFmt(this,'The100')">The 100</button>
+          <button class="fmt-btn" onclick="setFmt(this,'Custom')">Custom</button>
+        </div>
+        <input class="input" id="customOvers" placeholder="overs" style="width:70px;display:none" type="number" min="1" max="50" value="20">
+      </div>
+      <div class="config-row">
+        <span class="config-label">venue</span>
+        <input class="input" id="matchVenue" placeholder="Ground name (optional)" style="max-width:300px">
+      </div>
+      <div class="config-row">
+        <span class="config-label">date</span>
+        <input class="input" id="matchDate" type="date" style="max-width:180px">
+      </div>
+    </div>
+
+    <!-- Team selectors -->
+    <div class="match-grid">
+      <div class="team-selector">
+        <div class="ts-header">
+          <div class="ts-dot" id="matchT1Dot" style="background:#5ecf5e"></div>
+          <div class="ts-label">Team 1</div>
+          <div class="ts-count" id="t1Count" style="font-size:10px;color:var(--text-tertiary)"></div>
+        </div>
+        <div class="field-label">Select team</div>
+        <select class="select" id="matchT1Sel" onchange="onMatchTeamChange('t1')">
+          <option value="">— choose team —</option>
+        </select>
+        <div id="t1SquadPreview" class="squad-preview"></div>
+      </div>
+      <div class="team-selector">
+        <div class="ts-header">
+          <div class="ts-dot" id="matchT2Dot" style="background:#6eaecf"></div>
+          <div class="ts-label">Team 2</div>
+          <div class="ts-count" id="t2Count" style="font-size:10px;color:var(--text-tertiary)"></div>
+        </div>
+        <div class="field-label">Select team</div>
+        <select class="select" id="matchT2Sel" onchange="onMatchTeamChange('t2')">
+          <option value="">— choose team —</option>
+        </select>
+        <div id="t2SquadPreview" class="squad-preview"></div>
+      </div>
+    </div>
+
+    <!-- Export -->
+    <div id="exportBox" class="export-box hidden">
+      <div class="export-title">✓ Ready to export to Cricket Command</div>
+      <div id="exportMatchLabel" class="export-sub"></div>
+      <div class="export-steps">
+        <span>Step 1</span> — Click Export below to download the match file<br>
+        <span>Step 2</span> — Open Cricket Command in your browser<br>
+        <span>Step 3</span> — Click <em>&#8595; export local file</em> area → use <em>&#8593; import</em> → choose the downloaded file<br>
+        <span>Step 4</span> — Both full squads load in. Do the toss, pick your Playing 11 in the Setup tab, then start scoring.
+      </div>
+      <button class="btn lg green" onclick="exportToCommand()">⬇ Export Match to Cricket Command</button>
+    </div>
+    <div id="exportNotReady" class="panel" style="text-align:center;color:var(--text-tertiary);font-size:11px;padding:18px">
+      Select both teams above to enable export.
+    </div>
+
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       TAB: SERIES
+  ══════════════════════════════════════════════════ -->
+  <div id="tab-series" class="hidden">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div style="font-size:11px;color:var(--text-tertiary)">Group matches into a series for easy tracking.</div>
+      <button class="btn green" onclick="openSeriesModal()">+ new series</button>
+    </div>
+    <div id="seriesList" class="series-list"></div>
+    <div id="seriesEmpty" class="empty hidden">No series yet.<br>Create one to group your matches together.</div>
+  </div>
+
+</div><!-- /app -->
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- ═══════════════════════════════════════════════════════
+     MODALS
+════════════════════════════════════════════════════════ -->
+
+<!-- League Modal -->
+<div class="modal-overlay hidden" id="leagueModal">
+  <div class="modal-box">
+    <div class="modal-title" id="leagueModalTitle">New League / Competition</div>
+    <div class="field-label">Name</div>
+    <input class="input" id="lmName" placeholder="e.g. PSL 2027, IPL 2026">
+    <div class="field-label">Short name</div>
+    <input class="input" id="lmShort" placeholder="e.g. PSL, IPL" maxlength="6">
+    <div class="field-label">Format</div>
+    <select class="select" id="lmFmt">
+      <option value="T20">T20</option>
+      <option value="ODI">ODI</option>
+      <option value="T10">T10</option>
+      <option value="LAT20">LAT20</option>
+      <option value="The100">The 100</option>
+    </select>
+    <div class="field-label">Colour</div>
+    <input type="color" id="lmColor" value="#5ecf5e" style="height:32px;width:60px;border:none;background:none;cursor:pointer;padding:0">
+    <div class="form-actions">
+      <button class="btn green" onclick="saveLeague()">save</button>
+      <button class="btn" onclick="closeModal('leagueModal')">cancel</button>
+      <button class="btn red sm" id="leagueDeleteBtn" onclick="deleteLeague()" style="margin-left:auto">delete league</button>
+    </div>
+  </div>
+</div>
+
+<!-- Team Modal -->
+<div class="modal-overlay hidden" id="teamModal">
+  <div class="modal-box">
+    <div class="modal-title" id="teamModalTitle">New Team</div>
+    <div class="field-label">Team name</div>
+    <input class="input" id="tmName" placeholder="e.g. Lahore Qalandars">
+    <div class="field-label">Short name</div>
+    <input class="input" id="tmShort" placeholder="e.g. LQ" maxlength="5">
+    <div class="field-label">Team colour</div>
+    <input type="color" id="tmColor" value="#5ecf5e" style="height:32px;width:60px;border:none;background:none;cursor:pointer;padding:0">
+    <div class="form-actions">
+      <button class="btn green" onclick="saveTeam()">save</button>
+      <button class="btn" onclick="closeModal('teamModal')">cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Player Modal -->
+<div class="modal-overlay hidden" id="playerModal">
+  <div class="modal-box">
+    <div class="modal-title" id="playerModalTitle">Add Player</div>
+    <div class="field-label">Full name</div>
+    <input class="input" id="pmName" placeholder="Player name">
+    <div class="form-grid" style="margin-top:2px">
+      <div>
+        <div class="field-label">Role</div>
+        <select class="select" id="pmRole">
+          <option value="Bat">Batter</option>
+          <option value="Bowl">Bowler</option>
+          <option value="All">All-rounder</option>
+          <option value="WK">Wicket-keeper</option>
+        </select>
+      </div>
+      <div>
+        <div class="field-label">Batting hand</div>
+        <select class="select" id="pmBatHand">
+          <option value="R">Right</option>
+          <option value="L">Left</option>
+        </select>
+      </div>
+      <div>
+        <div class="field-label">Bowling hand</div>
+        <select class="select" id="pmBowlHand">
+          <option value="">— N/A —</option>
+          <option value="R">Right</option>
+          <option value="L">Left</option>
+        </select>
+      </div>
+      <div>
+        <div class="field-label">Bowling type</div>
+        <select class="select" id="pmBowlType">
+          <option value="">— N/A —</option>
+          <option value="FM">Fast medium</option>
+          <option value="FMO">Fast medium (swing)</option>
+          <option value="MED">Medium</option>
+          <option value="OS">Off spin</option>
+          <option value="LB">Leg break</option>
+          <option value="SLA">Slow left arm</option>
+          <option value="SLO">Slow left arm orthodox</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:flex;gap:14px;margin-top:10px">
+      <label style="font-size:11px;display:flex;align-items:center;gap:6px;cursor:pointer">
+        <input type="checkbox" id="pmIsCaptain"> Captain
+      </label>
+      <label style="font-size:11px;display:flex;align-items:center;gap:6px;cursor:pointer">
+        <input type="checkbox" id="pmIsKeeper"> Wicket-keeper
+      </label>
+    </div>
+    <div class="form-actions">
+      <button class="btn green" onclick="savePlayer()">save player</button>
+      <button class="btn" onclick="closeModal('playerModal')">cancel</button>
+      <button class="btn red sm" id="playerDeleteBtn" onclick="deletePlayer()" style="margin-left:auto;display:none">remove</button>
+    </div>
+  </div>
+</div>
+
+<!-- Series Modal -->
+<div class="modal-overlay hidden" id="seriesModal">
+  <div class="modal-box">
+    <div class="modal-title">New Series</div>
+    <div class="field-label">Series name</div>
+    <input class="input" id="smName" placeholder="e.g. PSL 2026 Playoffs">
+    <div class="field-label">Teams involved</div>
+    <div id="smTeamsList" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;max-height:200px;overflow-y:auto"></div>
+    <div class="form-actions">
+      <button class="btn green" onclick="saveSeries()">create series</button>
+      <button class="btn" onclick="closeModal('seriesModal')">cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════════════════
+// DATA STORE — all embedded in HTML
+// ══════════════════════════════════════════════════════════════════════════
+
+let DB = {
+  leagues: {},   // { leagueId: { id, name, short, fmt, color, teams:{teamId:{...}} } }
+  series: [],    // [{ id, name, matches:[{id,t1,t2,fmt,venue,date,played,result}] }]
+  _version: 1
+};
+
+// ── Persistence: save to window.name (survives page reload, cleared on close) ──
+// Also offer full JSON export/import for portability
+function persist(){
+  try{ window.name = JSON.stringify(DB); } catch(e){}
+}
+function loadFromStorage(){
+  try{
+    if(window.name && window.name.startsWith('{')){
+      const d = JSON.parse(window.name);
+      if(d && d.leagues){ DB = d; }
+    }
+  } catch(e){}
+}
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+function uid(){ return Math.random().toString(36).slice(2,10); }
+function slugify(s){ return s.toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,''); }
+function showToast(msg, color='var(--green)'){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.style.borderColor = color; t.style.color = color;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(()=>t.classList.remove('show'), 2600);
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// TABS
+// ══════════════════════════════════════════════════════════════════════════
+function showTab(name){
+  ['squads','match','series'].forEach(t=>{
+    document.getElementById('tab-'+t).classList.toggle('hidden', t!==name);
+  });
+  document.querySelectorAll('.main-tab').forEach((btn,i)=>{
+    btn.classList.toggle('active', ['squads','match','series'][i]===name);
+  });
+  if(name==='match') renderMatchTeamOptions();
+  if(name==='series') renderSeriesTab();
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// SQUADS TAB
+// ══════════════════════════════════════════════════════════════════════════
+let activeLeagueId = null;
+let activeTeamId   = null;
+let editingLeagueId = null;
+let editingTeamId   = null;
+let editingPlayerId = null;
+
+function renderLeagueList(){
+  const el = document.getElementById('leagueList');
+  const leagues = Object.values(DB.leagues);
+  if(!leagues.length){
+    el.innerHTML='<div class="empty" style="padding:20px;font-size:11px">No leagues yet.<br>Click + league to create one.</div>';
+    return;
+  }
+  el.innerHTML = leagues.map(l=>{
+    const teamCount = Object.keys(l.teams||{}).length;
+    return `<div class="league-item${activeLeagueId===l.id?' active':''}" onclick="selectLeague('${l.id}')">
+      <div class="li-dot" style="background:${l.color}"></div>
+      <div>
+        <div class="li-name">${l.name}</div>
+        <div class="li-meta">${l.fmt} · ${teamCount} team${teamCount!==1?'s':''}</div>
+      </div>
+      <button class="btn sm" onclick="event.stopPropagation();openLeagueEditModal('${l.id}')">edit</button>
+    </div>`;
+  }).join('');
+}
+
+function selectLeague(lid){
+  activeLeagueId = lid;
+  activeTeamId = null;
+  renderLeagueList();
+  const league = DB.leagues[lid];
+  document.getElementById('teamPane').classList.remove('hidden');
+  document.getElementById('teamPaneTitle').textContent = league.short || league.name;
+  renderTeamList();
+  document.getElementById('squadPane').classList.add('hidden');
+  document.getElementById('squadPlaceholder').classList.remove('hidden');
+}
+
+function renderTeamList(){
+  if(!activeLeagueId) return;
+  const league = DB.leagues[activeLeagueId];
+  const teams = Object.values(league.teams||{});
+  const el = document.getElementById('teamList');
+  if(!teams.length){
+    el.innerHTML='<div style="font-size:11px;color:var(--text-tertiary);padding:8px 4px">No teams yet.</div>';
+    return;
+  }
+  el.innerHTML = teams.map(t=>{
+    const count = (t.squad||[]).length;
+    return `<div class="team-item${activeTeamId===t.id?' active':''}" onclick="selectTeam('${t.id}')">
+      <div class="ti-dot" style="background:${t.color}"></div>
+      <div class="ti-name">${t.name}</div>
+      <div class="ti-count">${count}p</div>
+    </div>`;
+  }).join('');
+}
+
+function selectTeam(tid){
+  activeTeamId = tid;
+  renderTeamList();
+  renderSquadPane();
+  document.getElementById('squadPane').classList.remove('hidden');
+  document.getElementById('squadPlaceholder').classList.add('hidden');
+}
+
+function renderSquadPane(){
+  if(!activeLeagueId || !activeTeamId) return;
+  const team = DB.leagues[activeLeagueId].teams[activeTeamId];
+  if(!team) return;
+  document.getElementById('squadTeamDot').style.background = team.color;
+  document.getElementById('squadTeamName').textContent = team.name;
+  const cap = (team.squad||[]).find(p=>p.id===team.captainId);
+  const wk  = (team.squad||[]).find(p=>p.id===team.keeperId);
+  document.getElementById('squadTeamMeta').textContent =
+    [cap?'C: '+cap.name:'', wk?'WK: '+wk.name:''].filter(Boolean).join(' · ') || 'No captain / keeper set';
+  renderSquadTable();
+}
+
+function renderSquadTable(){
+  const team = DB.leagues[activeLeagueId]?.teams[activeTeamId];
+  if(!team) return;
+  const squad = team.squad || [];
+  const tbody = document.getElementById('squadTableBody');
+  const empty = document.getElementById('squadEmpty');
+  const table = document.getElementById('squadTable');
+  if(!squad.length){
+    table.style.display='none'; empty.classList.remove('hidden'); return;
+  }
+  table.style.display=''; empty.classList.add('hidden');
+  const roleMap = {Bat:'bat',Bowl:'bowl',All:'all',WK:'wk'};
+  const roleLabel = {Bat:'Bat',Bowl:'Bowl',All:'All',WK:'WK'};
+  const bowlTypeLabel = {FM:'FM',FMO:'FMO',MED:'Med',OS:'OS',LB:'LB',SLA:'SLA',SLO:'SLO'};
+  tbody.innerHTML = squad.map((p,i)=>{
+    const isCap = team.captainId === p.id;
+    const isWK  = team.keeperId  === p.id;
+    const tags = [isCap?'<span style="font-size:9px;color:var(--amber)">(C)</span>':'', isWK?'<span style="font-size:9px;color:var(--purple)">(WK)</span>':''].filter(Boolean).join(' ');
+    return `<tr>
+      <td><span style="font-weight:500">${p.name}</span> ${tags}</td>
+      <td><span class="role-badge role-${roleMap[p.role]||'bat'}">${roleLabel[p.role]||p.role}</span></td>
+      <td>${p.batHand||'—'}</td>
+      <td>${p.bowlHand||'—'}</td>
+      <td style="color:var(--text-secondary)">${bowlTypeLabel[p.bowlType]||p.bowlType||'—'}</td>
+      <td>${isCap?'<span style="color:var(--amber)">C</span>':''}${isWK?'<span style="color:var(--purple)">'+(isCap?' / ':'')+'WK</span>':''}</td>
+      <td><button class="btn sm" onclick="openEditPlayerModal('${p.id}')">edit</button></td>
+    </tr>`;
+  }).join('');
+}
+
+// ── League CRUD ────────────────────────────────────────────────────────────
+function openLeagueModal(){
+  editingLeagueId = null;
+  document.getElementById('leagueModalTitle').textContent = 'New League / Competition';
+  document.getElementById('lmName').value='';
+  document.getElementById('lmShort').value='';
+  document.getElementById('lmFmt').value='T20';
+  document.getElementById('lmColor').value='#5ecf5e';
+  document.getElementById('leagueDeleteBtn').style.display='none';
+  openModal('leagueModal');
+}
+function openLeagueEditModal(lid){
+  editingLeagueId = lid;
+  const l = DB.leagues[lid];
+  document.getElementById('leagueModalTitle').textContent = 'Edit League';
+  document.getElementById('lmName').value = l.name;
+  document.getElementById('lmShort').value = l.short||'';
+  document.getElementById('lmFmt').value = l.fmt||'T20';
+  document.getElementById('lmColor').value = l.color||'#5ecf5e';
+  document.getElementById('leagueDeleteBtn').style.display='';
+  openModal('leagueModal');
+}
+function saveLeague(){
+  const name = document.getElementById('lmName').value.trim();
+  if(!name){ showToast('League name required','var(--red)'); return; }
+  if(editingLeagueId){
+    const l = DB.leagues[editingLeagueId];
+    l.name = name; l.short = document.getElementById('lmShort').value.trim();
+    l.fmt = document.getElementById('lmFmt').value;
+    l.color = document.getElementById('lmColor').value;
+  } else {
+    const id = uid();
+    DB.leagues[id] = {
+      id, name,
+      short: document.getElementById('lmShort').value.trim(),
+      fmt: document.getElementById('lmFmt').value,
+      color: document.getElementById('lmColor').value,
+      teams: {}
+    };
+    activeLeagueId = id;
+  }
+  persist(); closeModal('leagueModal'); renderLeagueList();
+  if(editingLeagueId){ selectLeague(editingLeagueId); }
+  else { selectLeague(activeLeagueId); }
+  showToast('League saved');
+}
+function deleteLeague(){
+  if(!editingLeagueId) return;
+  if(!confirm('Delete this league and ALL its teams and players?')) return;
+  delete DB.leagues[editingLeagueId];
+  if(activeLeagueId===editingLeagueId){ activeLeagueId=null; activeTeamId=null; }
+  persist(); closeModal('leagueModal');
+  renderLeagueList();
+  document.getElementById('teamPane').classList.add('hidden');
+  document.getElementById('squadPane').classList.add('hidden');
+  document.getElementById('squadPlaceholder').classList.remove('hidden');
+  showToast('League deleted','var(--red)');
+}
+
+// ── Team CRUD ──────────────────────────────────────────────────────────────
+function openTeamModal(){
+  if(!activeLeagueId){ showToast('Select a league first','var(--amber)'); return; }
+  editingTeamId = null;
+  document.getElementById('teamModalTitle').textContent = 'New Team';
+  document.getElementById('tmName').value='';
+  document.getElementById('tmShort').value='';
+  document.getElementById('tmColor').value='#6eaecf';
+  openModal('teamModal');
+}
+function openTeamEditModal(){
+  if(!activeTeamId) return;
+  editingTeamId = activeTeamId;
+  const team = DB.leagues[activeLeagueId].teams[activeTeamId];
+  document.getElementById('teamModalTitle').textContent = 'Edit Team';
+  document.getElementById('tmName').value = team.name;
+  document.getElementById('tmShort').value = team.shortName||'';
+  document.getElementById('tmColor').value = team.color||'#6eaecf';
+  openModal('teamModal');
+}
+function saveTeam(){
+  const name = document.getElementById('tmName').value.trim();
+  if(!name){ showToast('Team name required','var(--red)'); return; }
+  const league = DB.leagues[activeLeagueId];
+  if(editingTeamId){
+    const team = league.teams[editingTeamId];
+    team.name = name;
+    team.shortName = document.getElementById('tmShort').value.trim();
+    team.color = document.getElementById('tmColor').value;
+  } else {
+    const id = uid();
+    league.teams[id] = {
+      id, name,
+      shortName: document.getElementById('tmShort').value.trim(),
+      color: document.getElementById('tmColor').value,
+      captainId: null, keeperId: null,
+      squad: []
+    };
+    activeTeamId = id;
+  }
+  persist(); closeModal('teamModal'); renderTeamList();
+  selectTeam(activeTeamId);
+  showToast('Team saved');
+}
+function confirmDeleteTeam(){
+  if(!activeTeamId) return;
+  const team = DB.leagues[activeLeagueId].teams[activeTeamId];
+  if(!confirm(`Delete ${team.name} and their entire squad?`)) return;
+  delete DB.leagues[activeLeagueId].teams[activeTeamId];
+  activeTeamId = null;
+  persist(); renderTeamList();
+  document.getElementById('squadPane').classList.add('hidden');
+  document.getElementById('squadPlaceholder').classList.remove('hidden');
+  showToast('Team deleted','var(--red)');
+}
+
+// ── Player CRUD ────────────────────────────────────────────────────────────
+function openAddPlayerModal(){
+  editingPlayerId = null;
+  document.getElementById('playerModalTitle').textContent = 'Add Player';
+  document.getElementById('pmName').value='';
+  document.getElementById('pmRole').value='Bat';
+  document.getElementById('pmBatHand').value='R';
+  document.getElementById('pmBowlHand').value='';
+  document.getElementById('pmBowlType').value='';
+  document.getElementById('pmIsCaptain').checked=false;
+  document.getElementById('pmIsKeeper').checked=false;
+  document.getElementById('playerDeleteBtn').style.display='none';
+  openModal('playerModal');
+}
+function openEditPlayerModal(pid){
+  const team = DB.leagues[activeLeagueId]?.teams[activeTeamId];
+  if(!team) return;
+  const player = team.squad.find(p=>p.id===pid);
+  if(!player) return;
+  editingPlayerId = pid;
+  document.getElementById('playerModalTitle').textContent = 'Edit Player';
+  document.getElementById('pmName').value = player.name;
+  document.getElementById('pmRole').value = player.role||'Bat';
+  document.getElementById('pmBatHand').value = player.batHand||'R';
+  document.getElementById('pmBowlHand').value = player.bowlHand||'';
+  document.getElementById('pmBowlType').value = player.bowlType||'';
+  document.getElementById('pmIsCaptain').checked = team.captainId === pid;
+  document.getElementById('pmIsKeeper').checked = team.keeperId === pid;
+  document.getElementById('playerDeleteBtn').style.display='';
+  openModal('playerModal');
+}
+function savePlayer(){
+  const name = document.getElementById('pmName').value.trim();
+  if(!name){ showToast('Player name required','var(--red)'); return; }
+  const team = DB.leagues[activeLeagueId].teams[activeTeamId];
+  const playerData = {
+    name,
+    role: document.getElementById('pmRole').value,
+    batHand: document.getElementById('pmBatHand').value,
+    bowlHand: document.getElementById('pmBowlHand').value,
+    bowlType: document.getElementById('pmBowlType').value,
+  };
+  const isCap = document.getElementById('pmIsCaptain').checked;
+  const isWK  = document.getElementById('pmIsKeeper').checked;
+  if(editingPlayerId){
+    const idx = team.squad.findIndex(p=>p.id===editingPlayerId);
+    if(idx>=0){ playerData.id = editingPlayerId; team.squad[idx] = playerData; }
+    if(isCap) team.captainId = editingPlayerId;
+    else if(team.captainId===editingPlayerId) team.captainId = null;
+    if(isWK)  team.keeperId  = editingPlayerId;
+    else if(team.keeperId===editingPlayerId)   team.keeperId  = null;
+  } else {
+    const id = uid();
+    playerData.id = id;
+    team.squad.push(playerData);
+    if(isCap) team.captainId = id;
+    if(isWK)  team.keeperId  = id;
+  }
+  persist(); closeModal('playerModal'); renderSquadTable(); renderSquadPane();
+  showToast('Player saved');
+}
+function deletePlayer(){
+  if(!editingPlayerId) return;
+  const team = DB.leagues[activeLeagueId].teams[activeTeamId];
+  const player = team.squad.find(p=>p.id===editingPlayerId);
+  if(!confirm(`Remove ${player?.name} from this squad?`)) return;
+  team.squad = team.squad.filter(p=>p.id!==editingPlayerId);
+  if(team.captainId===editingPlayerId) team.captainId=null;
+  if(team.keeperId===editingPlayerId)  team.keeperId=null;
+  persist(); closeModal('playerModal'); renderSquadTable(); renderSquadPane();
+  showToast('Player removed','var(--red)');
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// MATCH CREATOR TAB
+// ══════════════════════════════════════════════════════════════════════════
+let matchState = {
+  fmt: 'T20', totalOvers: 20,
+  t1: { teamRef: null },
+  t2: { teamRef: null }
+};
+
+function setFmt(btn, fmt){
+  document.querySelectorAll('.fmt-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  matchState.fmt = fmt;
+  const customOvers = document.getElementById('customOvers');
+  customOvers.style.display = fmt==='Custom' ? '' : 'none';
+  const fmtOvers = {T20:20,ODI:50,T10:10,LAT20:20,'The100':17};
+  matchState.totalOvers = fmtOvers[fmt] || 20;
+  checkExportReady();
+}
+
+function renderMatchTeamOptions(){
+  const allTeams = [];
+  Object.values(DB.leagues).forEach(l=>{
+    Object.values(l.teams||{}).forEach(t=>{
+      allTeams.push({ league: l.name, leagueColor: l.color, ...t });
+    });
+  });
+  ['t1','t2'].forEach(slot=>{
+    const sel = document.getElementById(`match${slot.toUpperCase()}Sel`);
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">— choose team —</option>';
+    let lastLeague = '';
+    allTeams.forEach(t=>{
+      if(t.league !== lastLeague){
+        const og = document.createElement('optgroup');
+        og.label = t.league; sel.appendChild(og); lastLeague = t.league;
+      }
+      const opt = document.createElement('option');
+      opt.value = t.id; opt.textContent = t.name;
+      sel.lastElementChild.appendChild(opt);
+    });
+    if(cur) sel.value = cur;
+  });
+}
+
+function getTeamById(tid){
+  for(const l of Object.values(DB.leagues)){
+    for(const t of Object.values(l.teams||{})){
+      if(t.id === tid) return t;
+    }
+  }
+  return null;
+}
+
+function onMatchTeamChange(slot){
+  const sel = document.getElementById(`match${slot.toUpperCase()}Sel`);
+  const tid = sel.value;
+  const team = tid ? getTeamById(tid) : null;
+  matchState[slot].teamRef = team;
+  const dot = document.getElementById(`match${slot.toUpperCase()}Dot`);
+  if(dot) dot.style.background = team ? team.color : (slot==='t1'?'#5ecf5e':'#6eaecf');
+  renderSquadPreview(slot);
+  checkExportReady();
+}
+
+function renderSquadPreview(slot){
+  const team = matchState[slot].teamRef;
+  const container = document.getElementById(`${slot}SquadPreview`);
+  const count = document.getElementById(`${slot}Count`);
+  if(!team || !team.squad || !team.squad.length){
+    container.innerHTML = '';
+    count.textContent = '';
+    return;
+  }
+  count.textContent = team.squad.length + ' players';
+  const roleOrder = {WK:0, Bat:1, All:2, Bowl:3};
+  const sorted = [...team.squad].sort((a,b)=>(roleOrder[a.role]||2)-(roleOrder[b.role]||2));
+  const roleHeaders = {WK:'Wicket-keepers', Bat:'Batters', All:'All-rounders', Bowl:'Bowlers'};
+  let lastRole = null;
+  let html = '';
+  sorted.forEach(p=>{
+    const roleGroup = p.role==='WK'?'WK':p.role==='Bat'?'Bat':p.role==='All'?'All':'Bowl';
+    if(roleGroup !== lastRole){
+      html += `<div class="sq-section-hdr">${roleHeaders[roleGroup]||roleGroup}</div>`;
+      lastRole = roleGroup;
+    }
+    const isCap = team.captainId === p.id;
+    const isWK  = team.keeperId  === p.id;
+    const tags = [(isCap?'C':''),(isWK?'WK':'')].filter(Boolean).join('/');
+    html += `<div class="sq-player">
+      <div class="sq-name">${p.name}</div>
+      ${tags?`<div class="sq-tags">${tags}</div>`:''}
+      <div class="sq-role">${p.role}${p.bowlType?' · '+p.bowlType:''}</div>
+    </div>`;
+  });
+  container.innerHTML = html;
+}
+
+function checkExportReady(){
+  const t1Ready = !!matchState.t1.teamRef;
+  const t2Ready = !!matchState.t2.teamRef;
+  const exportBox = document.getElementById('exportBox');
+  const notReady  = document.getElementById('exportNotReady');
+  if(t1Ready && t2Ready){
+    exportBox.classList.remove('hidden');
+    notReady.classList.add('hidden');
+    document.getElementById('exportMatchLabel').textContent =
+      `${matchState.t1.teamRef.name} vs ${matchState.t2.teamRef.name} · ${matchState.fmt}`;
+  } else {
+    exportBox.classList.add('hidden');
+    notReady.classList.remove('hidden');
+  }
+}
+
+function exportToCommand(){
+  const t1 = matchState.t1.teamRef;
+  const t2 = matchState.t2.teamRef;
+  if(!t1||!t2) return;
+  const fmt = matchState.fmt;
+  const fmtOvers = {T20:20,ODI:50,T10:10,LAT20:20,'The100':17};
+  const totalOvers = fmt==='Custom'
+    ? parseInt(document.getElementById('customOvers').value)||20
+    : (fmtOvers[fmt]||20);
+  const venue = document.getElementById('matchVenue').value.trim();
+  const date  = document.getElementById('matchDate').value;
+
+  // Full squads — no playing 11 selected yet, that happens in Command after toss
+  const commandT1 = {
+    name: t1.name, color: t1.color,
+    captainId: t1.captainId, keeperId: t1.keeperId,
+    squad: t1.squad.map(p=>({...p})),
+  };
+  const commandT2 = {
+    name: t2.name, color: t2.color,
+    captainId: t2.captainId, keeperId: t2.keeperId,
+    squad: t2.squad.map(p=>({...p})),
+  };
+
+  const snapshot = {
+    version: 3,
+    exportedAt: new Date().toISOString(),
+    matchLabel: `${t1.name} vs ${t2.name}`,
+    squads: { t1: commandT1, t2: commandT2 },
+    subs: { t1: [], t2: [] },
+    history: [],
+    fmt,
+    totalOvers,
+    venue,
+    setup: {
+      ground: venue,
+      date: date || new Date().toISOString().slice(0,10),
+      fmt,
+      totalOvers,
+      playing11: { t1: [], t2: [] },   // empty — set in Command after toss
+      toss: { winner: null, decision: null },
+      battingFirst: null,
+      matchStarted: false,
+    },
+    innings: [],
+    activeInnings: 0,
+    result: {
+      winnerKey: null, resultType: null, marginVal:'', oversRemaining:'',
+      dlsTarget:'', dlsScore:'', tieScore1:'', tieScore2:'',
+      inn1:{score:'',wickets:'',overs:''}, inn2:{score:'',wickets:'',overs:''},
+      potm:'', potmDetail:'', bestBowler:'', bestBowlerDetail:'',
+      topScorer:'', topScorerDetail:'', notes:'', confirmed:false, date:''
+    }
+  };
+
+  const json = JSON.stringify(snapshot, null, 2);
+  const blob = new Blob([json], {type:'application/json'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  const ts   = new Date().toISOString().slice(0,10);
+  a.href = url;
+  a.download = `${t1.name.replace(/[^a-z0-9]/gi,'_')}_vs_${t2.name.replace(/[^a-z0-9]/gi,'_')}_${ts}.json`;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+  showToast('Match file downloaded — import into Cricket Command');
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// SERIES TAB
+// ══════════════════════════════════════════════════════════════════════════
+function renderSeriesTab(){
+  const el = document.getElementById('seriesList');
+  const emptyEl = document.getElementById('seriesEmpty');
+  if(!DB.series.length){
+    el.innerHTML=''; emptyEl.classList.remove('hidden'); return;
+  }
+  emptyEl.classList.add('hidden');
+  el.innerHTML = DB.series.map(s=>{
+    const played = (s.matches||[]).filter(m=>m.played).length;
+    const total  = (s.matches||[]).length;
+    return `<div class="series-item">
+      <div class="si-header" onclick="toggleSeries('${s.id}')">
+        <div class="si-name">${s.name}</div>
+        <div class="si-meta">${played}/${total} played</div>
+        <div class="si-toggle" id="sit-${s.id}">›</div>
+        <button class="btn sm red" onclick="event.stopPropagation();deleteSeries('${s.id}')">delete</button>
+      </div>
+      <div id="sim-${s.id}" class="si-matches hidden">
+        <button class="btn sm green" style="margin-bottom:8px" onclick="addMatchToSeries('${s.id}')">+ add match</button>
+        ${(s.matches||[]).length
+          ? s.matches.map(m=>`
+            <div class="si-match">
+              <div class="sim-teams"><strong>${m.t1}</strong> vs <strong>${m.t2}</strong> · ${m.fmt}</div>
+              <div class="sim-date">${m.date||'—'}</div>
+              <span class="sim-status ${m.played?'sim-played':'sim-scheduled'}">${m.played?'played':'scheduled'}</span>
+              <button class="btn sm" onclick="toggleMatchPlayed('${s.id}','${m.id}')">${m.played?'mark pending':'mark played'}</button>
+              <button class="btn sm red" onclick="removeMatchFromSeries('${s.id}','${m.id}')">✕</button>
+            </div>`).join('')
+          : '<div style="font-size:11px;color:var(--text-tertiary);padding:4px 0">No matches yet.</div>'
+        }
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleSeries(sid){
+  const el = document.getElementById('sim-'+sid);
+  const icon = document.getElementById('sit-'+sid);
+  const open = !el.classList.contains('hidden');
+  el.classList.toggle('hidden', open);
+  icon.classList.toggle('open', !open);
+}
+
+function openSeriesModal(){
+  document.getElementById('smName').value='';
+  // Show all teams as checkboxes
+  const container = document.getElementById('smTeamsList');
+  const allTeams = [];
+  Object.values(DB.leagues).forEach(l=>{
+    Object.values(l.teams||{}).forEach(t=>allTeams.push(t));
+  });
+  container.innerHTML = allTeams.map(t=>
+    `<label style="font-size:11px;display:flex;align-items:center;gap:6px;cursor:pointer;padding:3px 6px;border:.5px solid var(--border-tertiary);border-radius:3px">
+      <input type="checkbox" value="${t.id}" data-name="${t.name}"> ${t.name}
+    </label>`
+  ).join('');
+  openModal('seriesModal');
+}
+
+function saveSeries(){
+  const name = document.getElementById('smName').value.trim();
+  if(!name){ showToast('Series name required','var(--red)'); return; }
+  DB.series.push({ id:uid(), name, matches:[], createdAt: new Date().toISOString() });
+  persist(); closeModal('seriesModal'); renderSeriesTab();
+  showToast('Series created');
+}
+
+function deleteSeries(sid){
+  if(!confirm('Delete this series?')) return;
+  DB.series = DB.series.filter(s=>s.id!==sid);
+  persist(); renderSeriesTab(); showToast('Series deleted','var(--red)');
+}
+
+function addMatchToSeries(sid){
+  const series = DB.series.find(s=>s.id===sid);
+  if(!series) return;
+  // Get all teams
+  const allTeams = [];
+  Object.values(DB.leagues).forEach(l=>Object.values(l.teams||{}).forEach(t=>allTeams.push(t)));
+  const t1Name = prompt('Team 1 name:\n'+allTeams.map(t=>t.name).join(', '));
+  if(!t1Name) return;
+  const t2Name = prompt('Team 2 name:');
+  if(!t2Name) return;
+  const date = prompt('Date (YYYY-MM-DD):') || new Date().toISOString().slice(0,10);
+  const fmt  = prompt('Format (T20/ODI/T10):') || 'T20';
+  series.matches.push({ id:uid(), t1:t1Name, t2:t2Name, date, fmt, played:false });
+  persist(); renderSeriesTab(); showToast('Match added to series');
+}
+
+function toggleMatchPlayed(sid, mid){
+  const series = DB.series.find(s=>s.id===sid);
+  if(!series) return;
+  const match = series.matches.find(m=>m.id===mid);
+  if(!match) return;
+  match.played = !match.played;
+  persist(); renderSeriesTab();
+}
+
+function removeMatchFromSeries(sid, mid){
+  const series = DB.series.find(s=>s.id===sid);
+  if(!series) return;
+  series.matches = series.matches.filter(m=>m.id!==mid);
+  persist(); renderSeriesTab(); showToast('Match removed','var(--red)');
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// BACKUP / RESTORE
+// ══════════════════════════════════════════════════════════════════════════
+function exportAllData(){
+  const json = JSON.stringify(DB, null, 2);
+  const blob = new Blob([json], {type:'application/json'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url;
+  a.download = `cricket_squad_manager_backup_${new Date().toISOString().slice(0,10)}.json`;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+  showToast('Backup downloaded');
+}
+
+function importAllData(input){
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e=>{
+    try{
+      const d = JSON.parse(e.target.result);
+      if(!d.leagues){ showToast('Not a valid backup file','var(--red)'); return; }
+      if(!confirm('This will REPLACE all current data. Continue?')){ input.value=''; return; }
+      DB = d;
+      persist();
+      activeLeagueId = null; activeTeamId = null;
+      renderLeagueList();
+      document.getElementById('teamPane').classList.add('hidden');
+      document.getElementById('squadPane').classList.add('hidden');
+      document.getElementById('squadPlaceholder').classList.remove('hidden');
+      showToast('Data restored from backup');
+    } catch(err){
+      showToast('Error reading file','var(--red)');
+    }
+    input.value='';
+  };
+  reader.readAsText(file);
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// MODAL HELPERS
+// ══════════════════════════════════════════════════════════════════════════
+function openModal(id){
+  document.getElementById(id).classList.remove('hidden');
+}
+function closeModal(id){
+  document.getElementById(id).classList.add('hidden');
+}
+// Close modal on overlay click
+document.querySelectorAll('.modal-overlay').forEach(overlay=>{
+  overlay.addEventListener('click', e=>{
+    if(e.target===overlay) overlay.classList.add('hidden');
+  });
+});
+
+// ══════════════════════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════════════════════
+loadFromStorage();
+renderLeagueList();
+
+// Set today's date in match creator
+document.getElementById('matchDate').value = new Date().toISOString().slice(0,10);
+</script>
+</body>
+</html>
