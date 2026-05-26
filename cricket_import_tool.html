@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cricket Import Tool</title>
+<style>
+:root {
+  --bg: #0e1117;
+  --bg2: #161b24;
+  --bg3: #1e2535;
+  --bg4: #252d3d;
+  --border: rgba(99,126,181,0.18);
+  --border2: rgba(99,126,181,0.32);
+  --text: #e8edf5;
+  --text2: #8a97b0;
+  --text3: #4a5568;
+  --green: #3ecf8e;
+  --green-bg: #0a1f16;
+  --green-border: #1a5c3a;
+  --blue: #4a90d9;
+  --blue-bg: #0a1526;
+  --blue-border: #1a3a6c;
+  --amber: #f5a623;
+  --amber-bg: #1a1200;
+  --amber-border: #5c3c00;
+  --red: #f05252;
+  --red-bg: #1f0a0a;
+  --red-border: #6c1a1a;
+  --purple: #a78bfa;
+  --purple-bg: #12091e;
+  --purple-border: #4c2a8c;
+  --mono: 'Courier New', Courier, monospace;
+  --radius: 8px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--mono);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+.app { max-width: 1100px; margin: 0 auto; padding: 16px; }
+
+/* TOP BAR */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--bg2); border: .5px solid var(--border2);
+  border-radius: var(--radius); padding: 12px 16px;
+  margin-bottom: 14px; flex-wrap: wrap; gap: 8px;
+}
+.brand { font-size: 15px; font-weight: 600; letter-spacing: .1em; color: var(--text); }
+.brand span { color: var(--green); }
+.sub { font-size: 10px; color: var(--text2); letter-spacing: .06em; margin-top: 2px; }
+
+/* STEPS */
+.steps {
+  display: flex; gap: 0; margin-bottom: 16px;
+  background: var(--bg2); border: .5px solid var(--border);
+  border-radius: var(--radius); overflow: hidden;
+}
+.step {
+  flex: 1; padding: 10px 8px; text-align: center; font-size: 10px;
+  letter-spacing: .06em; text-transform: uppercase; color: var(--text3);
+  border-right: .5px solid var(--border); cursor: default;
+  transition: all .2s; position: relative;
+}
+.step:last-child { border-right: none; }
+.step.active { color: var(--green); background: var(--green-bg); }
+.step.done { color: var(--blue); background: var(--blue-bg); }
+.step-num {
+  display: inline-block; width: 18px; height: 18px; border-radius: 50%;
+  background: var(--bg3); border: .5px solid var(--border); font-size: 9px;
+  line-height: 18px; text-align: center; margin-right: 5px;
+}
+.step.active .step-num { background: var(--green-bg); border-color: var(--green-border); color: var(--green); }
+.step.done .step-num { background: var(--blue-bg); border-color: var(--blue-border); color: var(--blue); }
+
+/* PANELS */
+.panel {
+  background: var(--bg2); border: .5px solid var(--border);
+  border-radius: var(--radius); padding: 16px; margin-bottom: 12px;
+}
+.panel-title {
+  font-size: 11px; font-weight: 600; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--text2);
+  margin-bottom: 12px; padding-bottom: 8px;
+  border-bottom: .5px solid var(--border);
+}
+.hidden { display: none !important; }
+
+/* BUTTONS */
+.btn {
+  font-family: var(--mono); font-size: 11px; padding: 6px 14px;
+  border: .5px solid var(--border2); border-radius: 5px;
+  background: transparent; color: var(--text2); cursor: pointer;
+  transition: all .15s;
+}
+.btn:hover { background: var(--bg3); color: var(--text); }
+.btn.green { border-color: var(--green-border); color: var(--green); background: var(--green-bg); }
+.btn.green:hover { background: #0d2a1e; }
+.btn.blue { border-color: var(--blue-border); color: var(--blue); background: var(--blue-bg); }
+.btn.blue:hover { background: #0d1f3a; }
+.btn.amber { border-color: var(--amber-border); color: var(--amber); background: var(--amber-bg); }
+.btn.red { border-color: var(--red-border); color: var(--red); background: var(--red-bg); }
+.btn.lg { font-size: 13px; padding: 9px 22px; font-weight: 600; }
+.btn.sm { font-size: 10px; padding: 4px 9px; }
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+
+/* INPUTS */
+.inp {
+  font-family: var(--mono); font-size: 11px; padding: 6px 9px;
+  background: var(--bg); border: .5px solid var(--border2);
+  border-radius: 5px; color: var(--text); width: 100%;
+  transition: border .15s;
+}
+.inp:focus { outline: none; border-color: var(--blue-border); }
+.sel {
+  font-family: var(--mono); font-size: 11px; padding: 6px 8px;
+  background: var(--bg); border: .5px solid var(--border2);
+  border-radius: 5px; color: var(--text); width: 100%; cursor: pointer;
+}
+.lbl { font-size: 9px; color: var(--text2); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 4px; margin-top: 10px; }
+.lbl:first-child { margin-top: 0; }
+
+/* DROP ZONE */
+.dropzone {
+  border: 2px dashed var(--border2); border-radius: var(--radius);
+  padding: 40px 20px; text-align: center; cursor: pointer;
+  transition: all .2s; background: var(--bg);
+}
+.dropzone:hover, .dropzone.drag-over {
+  border-color: var(--green); background: var(--green-bg);
+}
+.dropzone-icon { font-size: 36px; margin-bottom: 10px; }
+.dropzone-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+.dropzone-sub { font-size: 11px; color: var(--text2); line-height: 1.7; }
+
+/* VERIFICATION TABLE */
+.verify-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.verify-table th {
+  padding: 5px 8px; text-align: left; color: var(--text2);
+  font-size: 9px; letter-spacing: .08em; text-transform: uppercase;
+  border-bottom: .5px solid var(--border); font-weight: normal;
+}
+.verify-table td { padding: 6px 8px; border-bottom: .5px solid var(--bg3); vertical-align: top; }
+.verify-table tr:last-child td { border-bottom: none; }
+.chk-pass { color: var(--green); }
+.chk-warn { color: var(--amber); }
+.chk-fail { color: var(--red); }
+.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+/* SCORECARD */
+.scorecard { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media(max-width:680px){ .scorecard { grid-template-columns: 1fr; } }
+.inn-card {
+  background: var(--bg3); border: .5px solid var(--border);
+  border-radius: var(--radius); overflow: hidden;
+}
+.inn-header {
+  padding: 8px 12px; display: flex; align-items: center;
+  justify-content: space-between; border-bottom: .5px solid var(--border);
+}
+.inn-team { font-size: 12px; font-weight: 600; }
+.inn-score { font-size: 14px; font-weight: 700; color: var(--green); }
+.inn-body { padding: 8px 12px; }
+.bat-row { display: flex; align-items: center; gap: 6px; padding: 3px 0; border-bottom: .5px solid var(--bg4); font-size: 10px; }
+.bat-row:last-child { border-bottom: none; }
+.bat-name { flex: 1; }
+.bat-out { color: var(--text2); font-size: 9px; }
+.bat-runs { font-weight: 700; min-width: 28px; text-align: right; }
+.bat-balls { color: var(--text2); min-width: 22px; text-align: right; }
+.bat-sr { min-width: 38px; text-align: right; font-size: 9px; }
+
+/* MATCH HEADER */
+.match-header {
+  background: var(--bg3); border: .5px solid var(--border2);
+  border-radius: var(--radius); padding: 14px 16px; margin-bottom: 12px;
+}
+.mh-teams { font-size: 18px; font-weight: 700; letter-spacing: .04em; margin-bottom: 4px; }
+.mh-meta { font-size: 10px; color: var(--text2); display: flex; gap: 12px; flex-wrap: wrap; }
+.mh-badge {
+  display: inline-block; padding: 2px 8px; border-radius: 3px;
+  font-size: 9px; letter-spacing: .08em; text-transform: uppercase;
+  background: var(--blue-bg); border: .5px solid var(--blue-border); color: var(--blue);
+}
+.result-banner {
+  margin-top: 8px; padding: 6px 10px; border-radius: 5px;
+  font-size: 11px; font-weight: 600;
+  background: var(--green-bg); border: .5px solid var(--green-border); color: var(--green);
+  display: inline-block;
+}
+
+/* PROGRESS BAR */
+.progress-bar { height: 3px; background: var(--bg3); border-radius: 2px; overflow: hidden; margin-top: 8px; }
+.progress-fill { height: 100%; background: var(--green); border-radius: 2px; transition: width .3s; }
+
+/* STAT ROW */
+.stat-row { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: .5px solid var(--bg3); font-size: 11px; }
+.stat-row:last-child { border-bottom: none; }
+.stat-lbl { color: var(--text2); }
+.stat-val { font-weight: 500; }
+
+/* TOAST */
+.toast {
+  position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+  background: var(--bg2); border: .5px solid var(--green-border);
+  border-radius: var(--radius); padding: 8px 18px; font-size: 11px;
+  color: var(--green); z-index: 9999; opacity: 0; pointer-events: none;
+  transition: opacity .3s; white-space: nowrap;
+}
+.toast.show { opacity: 1; }
+
+/* GUIDE BOX */
+.guide {
+  background: var(--blue-bg); border: .5px solid var(--blue-border);
+  border-radius: var(--radius); padding: 12px 14px; margin-bottom: 12px;
+}
+.guide-title { font-size: 10px; font-weight: 600; color: var(--blue); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 6px; }
+.guide-step { font-size: 11px; color: #8ab4e8; padding: 3px 0; line-height: 1.6; }
+.guide-step span { color: var(--blue); font-weight: 600; }
+
+/* BOWLER TABLE */
+.bowl-table { width: 100%; border-collapse: collapse; font-size: 10px; margin-top: 8px; }
+.bowl-table th { padding: 3px 6px; color: var(--text2); font-size: 9px; letter-spacing: .06em; text-transform: uppercase; border-bottom: .5px solid var(--border); text-align: left; font-weight: normal; }
+.bowl-table td { padding: 4px 6px; border-bottom: .5px solid var(--bg4); }
+.bowl-table tr:last-child td { border-bottom: none; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div>
+      <div class="brand">Cricket <span>Import</span> Tool</div>
+      <div class="sub">convert cricsheet data · verify · export to research dashboard</div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <a href="https://cricsheet.org/matches/" target="_blank" class="btn sm blue">↗ Open Cricsheet</a>
+    </div>
+  </div>
+
+  <!-- STEPS -->
+  <div class="steps">
+    <div class="step active" id="step1"><span class="step-num">1</span>Load File</div>
+    <div class="step" id="step2"><span class="step-num">2</span>Review</div>
+    <div class="step" id="step3"><span class="step-num">3</span>Verify</div>
+    <div class="step" id="step4"><span class="step-num">4</span>Export</div>
+  </div>
+
+  <!-- STEP 1: LOAD FILE -->
+  <div id="panel-step1">
+    <div class="guide">
+      <div class="guide-title">How to use this tool</div>
+      <div class="guide-step"><span>Step 1</span> — Go to <strong>cricsheet.org/matches/</strong> and find the match you want</div>
+      <div class="guide-step"><span>Step 2</span> — Download the JSON file for that match</div>
+      <div class="guide-step"><span>Step 3</span> — Drop it below or click to select it</div>
+      <div class="guide-step"><span>Step 4</span> — Review, verify against Cricinfo, then export to your Research Dashboard</div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Load Cricsheet JSON File</div>
+      <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()"
+        ondragover="event.preventDefault();this.classList.add('drag-over')"
+        ondragleave="this.classList.remove('drag-over')"
+        ondrop="handleFileDrop(event)">
+        <div class="dropzone-icon">📂</div>
+        <div class="dropzone-title">Drop Cricsheet JSON file here</div>
+        <div class="dropzone-sub">or click to browse<br><span style="color:var(--text3)">Supports Cricsheet JSON format · one file at a time</span></div>
+      </div>
+      <input type="file" id="fileInput" accept=".json" style="display:none" onchange="handleFileSelect(this)">
+      <div id="loadError" class="hidden" style="margin-top:10px;padding:8px 12px;background:var(--red-bg);border:.5px solid var(--red-border);border-radius:5px;font-size:11px;color:var(--red)"></div>
+    </div>
+  </div>
+
+  <!-- STEP 2: REVIEW -->
+  <div id="panel-step2" class="hidden">
+    <div id="matchHeader"></div>
+    <div class="scorecard" id="scorecardView"></div>
+    <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+      <button class="btn green lg" onclick="goToStep(3)">✓ Looks Good — Continue to Verify</button>
+      <button class="btn" onclick="goToStep(1)">← Load Different File</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: VERIFY -->
+  <div id="panel-step3" class="hidden">
+    <div class="panel">
+      <div class="panel-title">Verification Checklist</div>
+      <div class="guide" style="margin-bottom:12px">
+        <div class="guide-title">Cross-check against Cricinfo</div>
+        <div class="guide-step">Compare the data below against the <a href="https://www.espncricinfo.com" target="_blank" style="color:var(--blue)">Cricinfo scorecard</a> for this match. Tick each item once confirmed.</div>
+      </div>
+      <table class="verify-table">
+        <thead><tr><th>✓</th><th>Check</th><th>Value from Cricsheet</th><th>Status</th></tr></thead>
+        <tbody id="verifyBody"></tbody>
+      </table>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Manual Overrides</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+        <div>
+          <div class="lbl">Time of Day</div>
+          <select class="sel" id="ovr_tod">
+            <option value="">Auto-detect</option>
+            <option value="Day">Day</option>
+            <option value="Day/Night">Day / Night</option>
+            <option value="Night">Night</option>
+          </select>
+        </div>
+        <div>
+          <div class="lbl">Venue (if missing)</div>
+          <input class="inp" id="ovr_venue" placeholder="Ground name">
+        </div>
+        <div>
+          <div class="lbl">Series / Competition</div>
+          <input class="inp" id="ovr_series" placeholder="e.g. PSL 2026">
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px">
+        <div>
+          <div class="lbl">Data confidence</div>
+          <div id="confidenceBar" style="margin-top:4px">
+            <div style="font-size:11px;color:var(--text2)" id="confidenceLabel">Calculating…</div>
+            <div class="progress-bar"><div class="progress-fill" id="confidenceFill" style="width:0%"></div></div>
+          </div>
+        </div>
+        <div>
+          <div class="lbl">Source tag</div>
+          <div style="font-size:11px;color:var(--text2);padding-top:6px">Cricsheet (imported) — auto-tagged</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn green lg" onclick="goToStep(4)">✓ Verified — Continue to Export</button>
+      <button class="btn" onclick="goToStep(2)">← Back to Review</button>
+    </div>
+  </div>
+
+  <!-- STEP 4: EXPORT -->
+  <div id="panel-step4" class="hidden">
+    <div class="panel">
+      <div class="panel-title">Export Options</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+
+        <div style="background:var(--green-bg);border:.5px solid var(--green-border);border-radius:var(--radius);padding:14px">
+          <div style="font-size:12px;font-weight:600;color:var(--green);margin-bottom:6px">📊 Research Dashboard</div>
+          <div style="font-size:11px;color:#6ecf9e;margin-bottom:10px;line-height:1.7">Export a match file compatible with your Research Dashboard. Import it using the local file upload button.</div>
+          <div style="font-size:10px;color:#4a9e6e;margin-bottom:12px;line-height:1.6">
+            ✓ Full ball-by-ball data<br>
+            ✓ Batting &amp; bowling scorecards<br>
+            ✓ Phase analysis ready<br>
+            ✓ Venue, date &amp; result data
+          </div>
+          <button class="btn green lg" style="width:100%" onclick="exportResearch()">⬇ Export to Research Dashboard</button>
+        </div>
+
+        <div style="background:var(--blue-bg);border:.5px solid var(--blue-border);border-radius:var(--radius);padding:14px">
+          <div style="font-size:12px;font-weight:600;color:var(--blue);margin-bottom:6px">🏏 Cricket Command</div>
+          <div style="font-size:11px;color:#6ea8d4;margin-bottom:10px;line-height:1.7">Export a match file to view or review in Cricket Command's scoring interface.</div>
+          <div style="font-size:10px;color:#4a7ea0;margin-bottom:12px;line-height:1.6">
+            ✓ Squads pre-loaded<br>
+            ✓ Ball-by-ball history<br>
+            ✓ Result confirmed<br>
+            ✓ Ready to review
+          </div>
+          <button class="btn blue lg" style="width:100%" onclick="exportCommand()">⬇ Export to Cricket Command</button>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Export Summary</div>
+      <div id="exportSummary" style="font-size:11px;color:var(--text2)">Ready to export.</div>
+    </div>
+
+    <div style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap">
+      <button class="btn green" onclick="resetTool()">⟳ Import Another Match</button>
+      <button class="btn" onclick="goToStep(3)">← Back to Verify</button>
+    </div>
+  </div>
+
+</div><!-- /app -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════════════════════════
+let rawCricsheet = null;   // Raw Cricsheet JSON
+let converted   = null;   // Converted to Cricket Command format
+let currentStep = 1;
+
+// ══════════════════════════════════════════════════════════════════════════
+// STEP NAVIGATION
+// ══════════════════════════════════════════════════════════════════════════
+function goToStep(n){
+  currentStep = n;
+  [1,2,3,4].forEach(i=>{
+    document.getElementById('panel-step'+i).classList.toggle('hidden', i!==n);
+    const stepEl = document.getElementById('step'+i);
+    stepEl.className = 'step' + (i===n?' active':i<n?' done':'');
+  });
+  if(n===2) renderReview();
+  if(n===3) renderVerify();
+  if(n===4) renderExportSummary();
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// FILE HANDLING
+// ══════════════════════════════════════════════════════════════════════════
+function handleFileDrop(e){
+  e.preventDefault();
+  document.getElementById('dropzone').classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if(file) processFile(file);
+}
+
+function handleFileSelect(input){
+  const file = input.files[0];
+  if(file) processFile(file);
+}
+
+function processFile(file){
+  const errEl = document.getElementById('loadError');
+  errEl.classList.add('hidden');
+  if(!file.name.endsWith('.json')){
+    errEl.textContent = 'Please select a .json file from Cricsheet.';
+    errEl.classList.remove('hidden');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      // Validate it looks like a Cricsheet file
+      if(!data.meta || !data.info || !data.innings){
+        errEl.textContent = 'This doesn\'t look like a Cricsheet JSON file. Expected "meta", "info" and "innings" fields.';
+        errEl.classList.remove('hidden');
+        return;
+      }
+      rawCricsheet = data;
+      converted = convertCricsheet(data);
+      showToast('File loaded: ' + (file.name));
+      goToStep(2);
+    } catch(err){
+      errEl.textContent = 'Error reading file: ' + err.message;
+      errEl.classList.remove('hidden');
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// CRICSHEET → CRICKET COMMAND CONVERTER
+// ══════════════════════════════════════════════════════════════════════════
+function convertCricsheet(cs){
+  const info    = cs.info || {};
+  const innings = cs.innings || [];
+  const teams   = info.teams || [];
+  const t1Name  = teams[0] || 'Team A';
+  const t2Name  = teams[1] || 'Team B';
+
+  // ── Match metadata ─────────────────────────────────────────────────────
+  const fmt       = detectFormat(info);
+  const totalOvers = info.overs || (fmt==='T20'||fmt==='T20I'||fmt==='LAT20' ? 20 : fmt==='ODI' ? 50 : fmt==='T10' ? 10 : 20);
+  const dateArr   = info.dates || [];
+  const matchDate = dateArr[0] || '';
+  const venue     = info.venue || info.city || '';
+  const eventName = info.event?.name || info.competition || '';
+  const potm      = Array.isArray(info.player_of_match) ? info.player_of_match[0] : (info.player_of_match || '');
+
+  // ── Toss ───────────────────────────────────────────────────────────────
+  const toss        = info.toss || {};
+  const tossWinner  = toss.winner === t1Name ? 't1' : 't2';
+  const tossDecision = toss.decision || 'bat';
+  const battingFirst = tossDecision==='bat' ? tossWinner : (tossWinner==='t1'?'t2':'t1');
+
+  // ── Players / squads ───────────────────────────────────────────────────
+  const t1Players = info.players ? (info.players[t1Name] || []) : [];
+  const t2Players = info.players ? (info.players[t2Name] || []) : [];
+  const registry  = info.registry?.people || {};
+
+  function buildSquadPlayer(name){
+    const id = slugify(name);
+    return { id, name, role:'Bat', batHand:'R', bowlHand:'', bowlType:'' };
+  }
+
+  const t1Squad = t1Players.map(buildSquadPlayer);
+  const t2Squad = t2Players.map(buildSquadPlayer);
+
+  // Detect keeper from innings data (stumped dismissals)
+  const keeperSet = new Set();
+  innings.forEach(inn=>{
+    (inn.overs||[]).forEach(ov=>{
+      (ov.deliveries||[]).forEach(d=>{
+        if(d.wickets){
+          d.wickets.forEach(w=>{
+            if((w.kind||'').includes('stumped') || (w.kind||'').includes('caught and bowled')){
+              if(w.fielders) w.fielders.forEach(f=>keeperSet.add(f.name||f));
+            }
+          });
+        }
+      });
+    });
+  });
+
+  function getKeeperId(squad){ return squad.find(p=>keeperSet.has(p.name))?.id || null; }
+  function getCaptainId(teamName, squad){
+    const cap = info.players_match_details?.[teamName]?.captain || '';
+    return squad.find(p=>p.name===cap)?.id || null;
+  }
+
+  const t1Squad2 = buildPlayerRoles(t1Squad, innings, t1Name);
+  const t2Squad2 = buildPlayerRoles(t2Squad, innings, t2Name);
+
+  // ── Convert innings ────────────────────────────────────────────────────
+  const convertedInnings = innings.slice(0,2).map((inn, innIdx)=>{
+    const battingTeam = inn.team;
+    const isT1Batting = battingTeam === t1Name;
+    const balls = [];
+    const batterMap  = {};  // name -> {runs,balls,fours,sixes,out,dismissal,isWK}
+    const bowlerMap  = {};  // name -> {overs,balls,runs,wickets,wides,noballs,maidens}
+    let legalBallCount = 0;
+    let currentOver = 0;
+    let currentBall = 0;
+    let maiden_balls = 0;
+    let maiden_runs  = 0;
+
+    (inn.overs||[]).forEach(ovObj=>{
+      currentOver = ovObj.over;
+      let overRuns = 0;
+      let overLegal = 0;
+      (ovObj.deliveries||[]).forEach(d=>{
+        const batter  = d.batter  || '';
+        const bowler  = d.bowler  || '';
+        const nstr    = d.non_striker || '';
+        const runs    = d.runs || {};
+        const extras  = d.extras || {};
+        const wkts    = d.wickets || [];
+
+        const isWide  = !!extras.wides;
+        const isNb    = !!extras.noballs;
+        const isBye   = !!extras.byes;
+        const isLb    = !!extras.legbyes;
+        const totalRuns = runs.total || 0;
+        const batterRuns = runs.batter || 0;
+        const extraRuns  = runs.extras || 0;
+
+        // Ball type for Cricket Command
+        let ballType;
+        if(isWide)       ballType = 'wd';
+        else if(isNb)    ballType = 'nb';
+        else if(isBye)   ballType = 'bye';
+        else if(isLb)    ballType = 'lb';
+        else if(wkts.length && !isWide && !isNb) ballType = 'W';
+        else if(batterRuns===4) ballType = 4;
+        else if(batterRuns===6) ballType = 6;
+        else if(batterRuns===0) ballType = 'dot';
+        else              ballType = batterRuns; // 1,2,3
+
+        const isLegal = !isWide && !isNb;
+        if(isLegal){ legalBallCount++; currentBall++; overLegal++; overRuns += totalRuns; }
+
+        // Build ball object (Cricket Command format)
+        const ballObj = {
+          type:     ballType,
+          runs:     totalRuns,
+          batter:   batter,
+          bowler:   bowler,
+          nonStriker: nstr,
+          over:     currentOver,
+          ball:     isLegal ? (legalBallCount % 6 || 6) : 0,
+          isWd:     isWide,
+          isNb:     isNb,
+          isBye:    isBye,
+          isLb:     isLb,
+        };
+
+        // Dismissal
+        if(wkts.length){
+          const w = wkts[0];
+          const kind = w.kind || '';
+          const playerOut = w.player_out || '';
+          const fielders  = (w.fielders||[]).map(f=>typeof f==='string'?f:f.name||'');
+          ballObj.dismissal = kind;
+          ballObj.playerOut = playerOut;
+          ballObj.fielders  = fielders;
+          if(kind.includes('run out')) ballObj.isRunout = true;
+          if(kind.includes('stumped')) ballObj.isStumped = true;
+        }
+
+        balls.push(ballObj);
+
+        // Accumulate batter stats
+        if(batter && isLegal && !isWide){
+          if(!batterMap[batter]) batterMap[batter] = {name:batter,runs:0,balls:0,fours:0,sixes:0,out:false,dismissal:''};
+          batterMap[batter].runs  += batterRuns;
+          batterMap[batter].balls += 1;
+          if(batterRuns===4) batterMap[batter].fours++;
+          if(batterRuns===6) batterMap[batter].sixes++;
+        }
+        // Dismissal on batter
+        if(wkts.length){
+          wkts.forEach(w=>{
+            const po = w.player_out;
+            if(!batterMap[po]) batterMap[po] = {name:po,runs:0,balls:0,fours:0,sixes:0,out:false,dismissal:''};
+            batterMap[po].out = true;
+            batterMap[po].dismissal = formatDismissal(w);
+          });
+        }
+
+        // Accumulate bowler stats
+        if(bowler){
+          if(!bowlerMap[bowler]) bowlerMap[bowler] = {name:bowler,overs:0,balls:0,runs:0,wickets:0,wides:0,noballs:0,maidens:0};
+          const bm = bowlerMap[bowler];
+          bm.runs += totalRuns;
+          if(isWide) bm.wides++;
+          else if(isNb) bm.noballs++;
+          else {
+            bm.balls++;
+            if(bm.balls===6){ bm.overs++; bm.balls=0; }
+          }
+          if(wkts.length){
+            wkts.forEach(w=>{
+              const kind = w.kind||'';
+              if(!['run out','obstructing the field','retired hurt','retired out'].includes(kind)){
+                bm.wickets++;
+              }
+            });
+          }
+        }
+      });
+
+      // Maiden detection
+      if(overLegal===6 && overRuns===0){
+        // Find the bowler for this over
+        const firstDel = (ovObj.deliveries||[])[0];
+        if(firstDel && firstDel.bowler && bowlerMap[firstDel.bowler]){
+          bowlerMap[firstDel.bowler].maidens++;
+        }
+      }
+    });
+
+    // Build ordered batters list (batting order)
+    const seen = new Set();
+    const orderedBatters = [];
+    balls.forEach(b=>{
+      if(b.batter && !seen.has(b.batter)){
+        seen.add(b.batter); orderedBatters.push(b.batter);
+      }
+      if(b.nonStriker && !seen.has(b.nonStriker)){
+        seen.add(b.nonStriker); orderedBatters.push(b.nonStriker);
+      }
+    });
+    const batters = orderedBatters.map(name=>batterMap[name]||{name,runs:0,balls:0,fours:0,sixes:0,out:false,dismissal:''});
+
+    // Bowler overs display
+    const bowlers = Object.values(bowlerMap).map(b=>({
+      ...b,
+      oversDisplay: b.overs + (b.balls>0 ? '.'+b.balls : '')
+    }));
+
+    // Total score
+    const totalRuns2 = balls.reduce((s,b)=>s+(b.runs||0),0);
+    const wickets    = batters.filter(b=>b.out).length;
+
+    // Extras breakdown
+    const extras = {
+      wides:   balls.filter(b=>b.isWd).reduce((s,b)=>s+(b.runs||1),0),
+      noballs: balls.filter(b=>b.isNb).reduce((s,b)=>s+(b.runs||1),0),
+      byes:    balls.filter(b=>b.isBye).reduce((s,b)=>s+(b.runs||0),0),
+      legbyes: balls.filter(b=>b.isLb).reduce((s,b)=>s+(b.runs||0),0),
+    };
+
+    return { team: battingTeam, balls, batters, bowlers, wickets, totalRuns: totalRuns2, extras, legalBalls: legalBallCount };
+  });
+
+  // ── Result ─────────────────────────────────────────────────────────────
+  const outcome = info.outcome || {};
+  let winnerKey = null;
+  let resultType = null;
+  let marginVal  = '';
+
+  if(outcome.winner){
+    winnerKey   = outcome.winner === t1Name ? 't1' : 't2';
+    if(outcome.by?.runs)    { resultType='runs';    marginVal=outcome.by.runs; }
+    if(outcome.by?.wickets) { resultType='wickets'; marginVal=outcome.by.wickets; }
+    if(outcome.by?.innings) { resultType='innings'; marginVal=outcome.by.innings; }
+  } else if(outcome.result === 'tie')       winnerKey = 'tie';
+  else if(outcome.result === 'no result')   winnerKey = null;
+
+  // Time of day inference
+  function inferTod(){
+    const fmtL = fmt.toLowerCase();
+    if(fmtL==='test' || fmtL==='fc') return 'Day';
+    if(fmtL==='odi') return 'Day/Night';
+    return 'Night'; // Default T20 to Night
+  }
+
+  return {
+    version: 3,
+    exportedAt: new Date().toISOString(),
+    matchLabel: t1Name + ' vs ' + t2Name,
+    _source: 'cricsheet',
+    _cricsheetDate: matchDate,
+    fmt, totalOvers,
+    venue, ground: venue,
+    squads: {
+      t1: {
+        name: t1Name, color: '#4a90d9',
+        captainId: getCaptainId(t1Name, t1Squad2),
+        keeperId:  getKeeperId(t1Squad2),
+        squad: t1Squad2
+      },
+      t2: {
+        name: t2Name, color: '#3ecf8e',
+        captainId: getCaptainId(t2Name, t2Squad2),
+        keeperId:  getKeeperId(t2Squad2),
+        squad: t2Squad2
+      }
+    },
+    subs: { t1:[], t2:[] },
+    setup: {
+      ground: venue,
+      date: matchDate,
+      fmt, totalOvers,
+      toss: { winner: tossWinner, decision: tossDecision },
+      battingFirst,
+      matchStarted: true,
+      playing11: {
+        t1: t1Squad2.map(p=>p.id),
+        t2: t2Squad2.map(p=>p.id)
+      }
+    },
+    innings: convertedInnings,
+    activeInnings: 2,
+    result: {
+      winnerKey, resultType,
+      marginVal: String(marginVal),
+      oversRemaining:'', dlsTarget:'', dlsScore:'',
+      tieScore1:'', tieScore2:'',
+      inn1:{ score: convertedInnings[0]?.totalRuns||'', wickets: convertedInnings[0]?.wickets||'', overs:'' },
+      inn2:{ score: convertedInnings[1]?.totalRuns||'', wickets: convertedInnings[1]?.wickets||'', overs:'' },
+      potm, potmDetail:'',
+      bestBowler:'', bestBowlerDetail:'',
+      topScorer:'', topScorerDetail:'',
+      notes: 'Imported from Cricsheet',
+      confirmed: true,
+      date: matchDate,
+      timeOfDay: inferTod(),
+      event: eventName,
+    }
+  };
+}
+
+function buildPlayerRoles(squad, innings, teamName){
+  // Infer bowling types from who actually bowled in the innings
+  const bowlerNames = new Set();
+  innings.forEach(inn=>{
+    if(inn.team !== teamName) { // they bowl in the other team's innings
+      (inn.overs||[]).forEach(ov=>{
+        (ov.deliveries||[]).forEach(d=>{ if(d.bowler) bowlerNames.add(d.bowler); });
+      });
+    }
+  });
+  return squad.map(p=>({
+    ...p,
+    role: bowlerNames.has(p.name) ? 'Bowl' : 'Bat'
+  }));
+}
+
+function detectFormat(info){
+  const mt = (info.match_type || info.format || '').toUpperCase();
+  if(mt==='T20' || mt==='T20I') return 'T20I';
+  if(mt==='ODI') return 'ODI';
+  if(mt==='TEST' || mt==='FC') return 'Test';
+  if(mt==='T10') return 'T10';
+  if(mt==='THE HUNDRED' || mt==='100') return 'The100';
+  // Infer from competition name
+  const ev = (info.event?.name || '').toLowerCase();
+  if(ev.includes('test')) return 'Test';
+  if(ev.includes('odi')) return 'ODI';
+  if(ev.includes('t20') || ev.includes('twenty20')) return 'T20I';
+  return 'T20I';
+}
+
+function formatDismissal(w){
+  const kind = w.kind || '';
+  const po   = w.player_out || '';
+  const fielders = (w.fielders||[]).map(f=>typeof f==='string'?f:f.name||'');
+  if(kind==='caught') return 'c '+fielders[0]+' b '+po;
+  if(kind==='bowled') return 'b '+po;
+  if(kind==='lbw') return 'lbw b '+po;
+  if(kind==='stumped') return 'st '+fielders[0];
+  if(kind==='run out') return 'run out ('+fielders.join('/')+')';
+  if(kind==='caught and bowled') return 'c&b '+po;
+  if(kind==='hit wicket') return 'hit wkt b '+po;
+  return kind;
+}
+
+function slugify(s){ return s.toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,''); }
+
+// ══════════════════════════════════════════════════════════════════════════
+// STEP 2: REVIEW
+// ══════════════════════════════════════════════════════════════════════════
+function renderReview(){
+  if(!converted) return;
+  const m   = converted;
+  const t1  = m.squads.t1.name;
+  const t2  = m.squads.t2.name;
+  const inn1 = m.innings[0];
+  const inn2 = m.innings[1];
+
+  // Match header
+  const winner = m.result.winnerKey==='t1'?t1:m.result.winnerKey==='t2'?t2:'';
+  const margin = m.result.resultType ? (m.result.marginVal + ' ' + m.result.resultType) : '';
+  const resultStr = winner ? (winner + ' won' + (margin?' by '+margin:'')) : 'No result / Tie';
+  const fmtColor = {'T20I':'#3fb950','T20':'#3fb950','ODI':'#58a6ff','Test':'#f5a623','T10':'#ae7ecf'}[m.fmt] || '#8b949e';
+
+  document.getElementById('matchHeader').innerHTML = `
+  <div class="match-header">
+    <div class="mh-teams">${t1} <span style="color:var(--text2)">vs</span> ${t2}</div>
+    <div class="mh-meta">
+      <span class="mh-badge" style="background:${fmtColor}22;border-color:${fmtColor}55;color:${fmtColor}">${m.fmt}</span>
+      ${m.venue ? '<span>📍 '+m.venue+'</span>' : ''}
+      ${m.result.date ? '<span>📅 '+m.result.date+'</span>' : ''}
+      ${m.result.event ? '<span>🏆 '+m.result.event+'</span>' : ''}
+    </div>
+    <div class="result-banner">${resultStr}</div>
+    ${m.result.potm ? '<div style="font-size:11px;color:var(--amber);margin-top:6px">🏅 Player of the Match: '+m.result.potm+'</div>' : ''}
+  </div>`;
+
+  // Scorecard
+  function innCard(inn, innIdx){
+    if(!inn) return '';
+    const bowlingTeam = innIdx===0 ? t2 : t1;
+    const headerColor = innIdx===0 ? '#4a90d9' : '#3ecf8e';
+    const extras = inn.extras || {};
+    const extTotal = (extras.wides||0)+(extras.noballs||0)+(extras.byes||0)+(extras.legbyes||0);
+
+    const batRows = (inn.batters||[]).filter(b=>b.name).map(b=>{
+      const sr = b.balls>0 ? (b.runs/b.balls*100).toFixed(0) : '—';
+      const srColor = parseFloat(sr)>150?'var(--green)':parseFloat(sr)<80?'var(--red)':'var(--text2)';
+      return `<div class="bat-row">
+        <div class="bat-name">${b.name} ${b.out ? '<span class="bat-out">'+b.dismissal+'</span>' : '<span style="color:var(--green);font-size:9px">not out</span>'}</div>
+        <div class="bat-runs">${b.runs}</div>
+        <div class="bat-balls">(${b.balls})</div>
+        <div class="bat-sr" style="color:${srColor}">${sr}</div>
+      </div>`;
+    }).join('');
+
+    const bowlRows = (inn.bowlers||[]).filter(b=>b.name).map(b=>{
+      const legBalls = b.overs*6 + b.balls;
+      const eco = legBalls>0 ? (b.runs/(legBalls/6)).toFixed(1) : '—';
+      const ecoColor = parseFloat(eco)<7?'var(--green)':parseFloat(eco)>10?'var(--red)':'var(--text2)';
+      return `<tr>
+        <td>${b.name}</td>
+        <td class="num">${b.overs}.${b.balls}</td>
+        <td class="num">${b.maidens||0}</td>
+        <td class="num">${b.runs}</td>
+        <td class="num" style="color:var(--green)">${b.wickets}</td>
+        <td class="num" style="color:${ecoColor}">${eco}</td>
+      </tr>`;
+    }).join('');
+
+    return `<div class="inn-card">
+      <div class="inn-header">
+        <div class="inn-team" style="color:${headerColor}">${inn.team}</div>
+        <div class="inn-score">${inn.totalRuns}/${inn.wickets}</div>
+      </div>
+      <div class="inn-body">
+        ${batRows}
+        <div style="font-size:10px;color:var(--text2);margin:6px 0 2px;padding-top:6px;border-top:.5px solid var(--bg4)">
+          Extras: ${extTotal} (w:${extras.wides||0} nb:${extras.noballs||0} b:${extras.byes||0} lb:${extras.legbyes||0})
+        </div>
+        ${bowlRows ? `<table class="bowl-table" style="margin-top:8px">
+          <thead><tr><th>${bowlingTeam} Bowling</th><th>O</th><th>M</th><th>R</th><th>W</th><th>Eco</th></tr></thead>
+          <tbody>${bowlRows}</tbody>
+        </table>` : ''}
+      </div>
+    </div>`;
+  }
+
+  document.getElementById('scorecardView').innerHTML = innCard(inn1,0) + innCard(inn2,1);
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// STEP 3: VERIFY
+// ══════════════════════════════════════════════════════════════════════════
+function renderVerify(){
+  if(!converted) return;
+  const m   = converted;
+  const inn1 = m.innings[0];
+  const inn2 = m.innings[1];
+  const info = rawCricsheet?.info || {};
+
+  // Pre-fill venue override if missing
+  const venueEl = document.getElementById('ovr_venue');
+  if(venueEl && !venueEl.value) venueEl.value = m.venue || '';
+  const seriesEl = document.getElementById('ovr_series');
+  if(seriesEl && !seriesEl.value) seriesEl.value = m.result.event || '';
+
+  // Verification checks
+  const checks = [];
+
+  // 1. Teams
+  checks.push({
+    label: 'Teams',
+    value: (m.squads.t1.name) + ' vs ' + (m.squads.t2.name),
+    status: m.squads.t1.name && m.squads.t2.name ? 'pass' : 'fail',
+    note: 'Verify team names match Cricinfo'
+  });
+
+  // 2. Date
+  checks.push({
+    label: 'Date',
+    value: m.result.date || '—',
+    status: m.result.date ? 'pass' : 'warn',
+    note: m.result.date ? '' : 'Date not found in file'
+  });
+
+  // 3. Venue
+  checks.push({
+    label: 'Venue',
+    value: m.venue || '(not in file — enter manually above)',
+    status: m.venue ? 'pass' : 'warn',
+    note: ''
+  });
+
+  // 4. 1st innings score
+  if(inn1){
+    const balls1 = inn1.balls.filter(b=>!b.isWd&&!b.isNb).length;
+    const legOvers = (Math.floor(balls1/6)) + '.' + (balls1%6);
+    checks.push({
+      label: '1st Innings',
+      value: inn1.team + ': ' + inn1.totalRuns + '/' + inn1.wickets + ' (' + legOvers + ' ov)',
+      status: inn1.totalRuns > 0 ? 'pass' : 'warn',
+      note: 'Ball count: ' + inn1.legalBalls
+    });
+  }
+
+  // 5. 2nd innings score
+  if(inn2){
+    const balls2 = inn2.balls.filter(b=>!b.isWd&&!b.isNb).length;
+    const legOvers2 = (Math.floor(balls2/6)) + '.' + (balls2%6);
+    checks.push({
+      label: '2nd Innings',
+      value: inn2.team + ': ' + inn2.totalRuns + '/' + inn2.wickets + ' (' + legOvers2 + ' ov)',
+      status: inn2.totalRuns > 0 ? 'pass' : 'warn',
+      note: 'Ball count: ' + inn2.legalBalls
+    });
+  }
+
+  // 6. Result
+  const winner = m.result.winnerKey==='t1'?m.squads.t1.name:m.result.winnerKey==='t2'?m.squads.t2.name:'No result';
+  const margin = m.result.resultType ? ' by '+m.result.marginVal+' '+m.result.resultType : '';
+  checks.push({
+    label: 'Result',
+    value: winner + margin,
+    status: m.result.winnerKey ? 'pass' : 'warn',
+    note: ''
+  });
+
+  // 7. Player of match
+  checks.push({
+    label: 'Player of Match',
+    value: m.result.potm || '—',
+    status: m.result.potm ? 'pass' : 'warn',
+    note: ''
+  });
+
+  // 8. Ball count
+  const totalBalls = (inn1?.balls?.length||0) + (inn2?.balls?.length||0);
+  checks.push({
+    label: 'Total deliveries',
+    value: totalBalls + ' (inc. extras)',
+    status: totalBalls > 100 ? 'pass' : 'warn',
+    note: totalBalls < 100 ? 'Unusually low — check file' : ''
+  });
+
+  // 9. Extras consistency
+  if(inn1){
+    const wides  = inn1.balls.filter(b=>b.isWd).length;
+    const noballs = inn1.balls.filter(b=>b.isNb).length;
+    checks.push({
+      label: '1st Inn Extras',
+      value: 'W:'+wides+' NB:'+noballs,
+      status: 'pass',
+      note: ''
+    });
+  }
+
+  // Confidence score
+  const passed = checks.filter(c=>c.status==='pass').length;
+  const pct = Math.round(passed/checks.length*100);
+  document.getElementById('confidenceFill').style.width = pct + '%';
+  document.getElementById('confidenceLabel').textContent = pct + '% data confidence (' + passed + '/' + checks.length + ' checks passed)';
+  document.getElementById('confidenceFill').style.background = pct>=80?'var(--green)':pct>=60?'var(--amber)':'var(--red)';
+
+  // Render table
+  const tbody = document.getElementById('verifyBody');
+  tbody.innerHTML = checks.map((c,i)=>{
+    const icon = c.status==='pass' ? '<span class="chk-pass">✓</span>' : c.status==='warn' ? '<span class="chk-warn">⚠</span>' : '<span class="chk-fail">✗</span>';
+    const statusLabel = c.status==='pass' ? '<span class="chk-pass">Pass</span>' : c.status==='warn' ? '<span class="chk-warn">Review</span>' : '<span class="chk-fail">Fail</span>';
+    return `<tr>
+      <td><input type="checkbox" id="chk_${i}" style="accent-color:var(--green)"></td>
+      <td style="color:var(--text2)">${c.label}</td>
+      <td style="color:var(--text)">${c.value}${c.note?'<br><span style="font-size:9px;color:var(--text2)">'+c.note+'</span>':''}</td>
+      <td>${statusLabel}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// STEP 4: EXPORT
+// ══════════════════════════════════════════════════════════════════════════
+function applyOverrides(){
+  if(!converted) return;
+  const tod    = document.getElementById('ovr_tod')?.value;
+  const venue  = document.getElementById('ovr_venue')?.value?.trim();
+  const series = document.getElementById('ovr_series')?.value?.trim();
+  if(tod)    { converted.result.timeOfDay = tod; converted.setup.tod = tod; }
+  if(venue)  { converted.venue = venue; converted.ground = venue; converted.setup.ground = venue; }
+  if(series) { converted.result.event = series; converted.series = series; }
+}
+
+function renderExportSummary(){
+  applyOverrides();
+  if(!converted) return;
+  const m   = converted;
+  const inn1 = m.innings[0];
+  const inn2 = m.innings[1];
+  const t1   = m.squads.t1.name;
+  const t2   = m.squads.t2.name;
+  const winner = m.result.winnerKey==='t1'?t1:m.result.winnerKey==='t2'?t2:'No result';
+  const totalBalls = (inn1?.balls?.length||0)+(inn2?.balls?.length||0);
+  const hasBBB = totalBalls > 0;
+
+  document.getElementById('exportSummary').innerHTML = `
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+    <div class="stat-row"><span class="stat-lbl">Match</span><span class="stat-val">${t1} vs ${t2}</span></div>
+    <div class="stat-row"><span class="stat-lbl">Format</span><span class="stat-val">${m.fmt}</span></div>
+    <div class="stat-row"><span class="stat-lbl">Date</span><span class="stat-val">${m.result.date||'—'}</span></div>
+    <div class="stat-row"><span class="stat-lbl">Venue</span><span class="stat-val">${m.venue||'—'}</span></div>
+    <div class="stat-row"><span class="stat-lbl">Result</span><span class="stat-val" style="color:var(--green)">${winner} won</span></div>
+    <div class="stat-row"><span class="stat-lbl">Time of Day</span><span class="stat-val">${m.result.timeOfDay||'—'}</span></div>
+    <div class="stat-row"><span class="stat-lbl">Deliveries</span><span class="stat-val">${totalBalls} total</span></div>
+    <div class="stat-row"><span class="stat-lbl">Ball-by-ball</span><span class="stat-val" style="color:${hasBBB?'var(--green)':'var(--red)'}">${hasBBB?'✓ Yes':'✗ No'}</span></div>
+    <div class="stat-row"><span class="stat-lbl">Source</span><span class="stat-val">Cricsheet</span></div>
+  </div>`;
+}
+
+function buildExportData(){
+  applyOverrides();
+  return JSON.parse(JSON.stringify(converted)); // deep clone
+}
+
+function downloadJSON(data, filename){
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], {type:'application/json'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+
+function exportResearch(){
+  const data = buildExportData();
+  const t1 = data.squads.t1.name.replace(/[^a-z0-9]/gi,'_');
+  const t2 = data.squads.t2.name.replace(/[^a-z0-9]/gi,'_');
+  const dt = data.result.date || new Date().toISOString().slice(0,10);
+  downloadJSON(data, t1+'_vs_'+t2+'_'+dt+'_research.json');
+  showToast('Research export downloaded — import via local file button in dashboard');
+}
+
+function exportCommand(){
+  const data = buildExportData();
+  const t1 = data.squads.t1.name.replace(/[^a-z0-9]/gi,'_');
+  const t2 = data.squads.t2.name.replace(/[^a-z0-9]/gi,'_');
+  const dt = data.result.date || new Date().toISOString().slice(0,10);
+  downloadJSON(data, t1+'_vs_'+t2+'_'+dt+'_command.json');
+  showToast('Cricket Command export downloaded');
+}
+
+function resetTool(){
+  rawCricsheet = null; converted = null;
+  document.getElementById('fileInput').value = '';
+  document.getElementById('loadError').classList.add('hidden');
+  goToStep(1);
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════════════════════════════════════
+function showToast(msg, color){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  if(color) t.style.borderColor = color;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(()=>t.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>
